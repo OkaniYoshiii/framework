@@ -2,8 +2,12 @@
 
 namespace App;
 
+use App\Traits\SingletonTrait;
+
 class Debugger
 {
+    use SingletonTrait;
+    
     public function dump(mixed $value) : void
     {
         echo '<pre>';

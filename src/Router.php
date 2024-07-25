@@ -2,30 +2,23 @@
 
 namespace App;
 
-use App\Container\Route;
+use App\Containers\Route;
 use App\Request;
+use App\Traits\SingletonTrait;
 use Exception;
 
 class Router
 {
+    use SingletonTrait;
+    
     private Request $request;
-
     private array $routes;
-
-    private static self $instance;
 
     private function __construct()
     {
         $this->request = Request::getInstance();
 
         $this->decodeRoutes();
-    }
-
-    public static function getInstance() : self
-    {
-        if(!isset(self::$instance)) self::$instance = new Router();
-        
-        return self::$instance;
     }
 
     private function decodeRoutes() : void
