@@ -6,7 +6,9 @@ use Exception;
 
 class Autoloader
 {
-    public function register()
+    private static self $instance;
+
+    private function __construct()
     {
         spl_autoload_register(function(string $class) {
             if(!str_starts_with($class, 'App')) throw new Exception('Can\'t load class ' . $class . ' : namespace doesn\'t start with \'App\'');
@@ -25,5 +27,12 @@ class Autoloader
             if(!file_exists($filepath)) throw new Exception('Class ' . $class . ' not found in ' . $filepath . '. The filename doesn\'t match the name of the class or the namespace doesn\'t match the folder structure.');
             require_once $filepath;
         });
+    }
+
+    public static function getInstance() : self
+    {
+        if(!isset(self::$instance)) self::$instance = new Autoloader();
+
+        return self::$instance;
     }
 }

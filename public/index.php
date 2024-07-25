@@ -10,7 +10,6 @@ require_once '../src/Autoloader.php';
 $loader = new \Twig\Loader\FilesystemLoader('../templates');
 $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
 
-$autoloader = new Autoloader();
-$autoloader->register();
+$autoloader = Autoloader::getInstance();
 
 echo $twig->render('index.html.twig');
