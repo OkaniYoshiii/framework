@@ -22,7 +22,7 @@ class Autoloader
             $filepath .= str_replace('\\', DIRECTORY_SEPARATOR, $classStr);
             $filepath .= '.php';
 
-            if(file_exists($filepath)) throw new Exception('Class ' . $class . ' not found in ' . $filepath . '. The filename doesn\'t match the name of the class or the namespace doesn\'t match the folder structure.');
+            if(!file_exists($filepath)) throw new Exception('Class ' . $class . ' not found in ' . $filepath . '. The filename doesn\'t match the name of the class or the namespace doesn\'t match the folder structure.');
             require_once $filepath;
         });
     }
