@@ -9,12 +9,21 @@ class Request
     private string $queryString;
     private array $parameters;
 
-    public function __construct()
+    private static self $instance;
+
+    private function __construct()
     {
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->queryString = $_SERVER['QUERY_STRING'];
         $this->parameters = ($this->method === 'GET') ? $_GET : null;
+    }
+
+    public static function getInstance() : self
+    {
+        if(!isset(self::$instance)) self::$instance = new Request();
+
+        return self::$instance;
     }
 
     /**
