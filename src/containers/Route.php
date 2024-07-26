@@ -11,7 +11,8 @@ class Route
     public function __construct(string $path, string $controller)
     {
         $this->path = $path;
-        list($this->controller, $this->method) = explode('::', $controller);
+        $this->controller = 'App\\Controllers\\' . explode('::', $controller)[0];
+        $this->method = explode('::', $controller)[1];
     }
 
     /**

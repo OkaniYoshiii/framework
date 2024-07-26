@@ -14,8 +14,6 @@ class Autoloader
     private function __construct()
     {
         spl_autoload_register(function(string $class) {
-            echo $class;
-            echo '<br>';
             if(!str_starts_with($class, 'App')) throw new Exception('Can\'t load class ' . $class . ' : namespace doesn\'t start with \'App\'');
             $classStr = substr_replace($class, 'src', 0, strlen('app'));
             
@@ -28,6 +26,9 @@ class Autoloader
             $filepath = '..\\';
             $filepath .= str_replace('\\', DIRECTORY_SEPARATOR, $classStr);
             $filepath .= '.php';
+
+            echo $filepath;
+            echo '<br>';
 
             if(!file_exists($filepath)) throw new Exception('Class ' . $class . ' not found in ' . $filepath . '. The filename doesn\'t match the name of the class or the namespace doesn\'t match the folder structure.');
             require_once $filepath;
