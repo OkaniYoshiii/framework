@@ -1,4 +1,4 @@
 vendor
 node_modules
 public/uploads
-config/config.local.php
+config/config.local.json
