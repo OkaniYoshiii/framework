@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Autoloader;
+use App\ExceptionHandler;
 use App\Router;
 
 require_once '../vendor/autoload.php';
@@ -12,6 +13,9 @@ $autoloader = Autoloader::getInstance();
 
 $loader = new \Twig\Loader\FilesystemLoader('../templates');
 $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
+
+$exceptionHandler = ExceptionHandler::getInstance();
+$exceptionHandler->start();
 
 $router = Router::getInstance();
 $route = $router->getRoute();
