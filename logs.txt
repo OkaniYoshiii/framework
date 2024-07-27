@@ -1,6 +1,0 @@
-2024-07-27 14:34 : Uncaught Exception in E:\WAMP\www\framework\public\index.php, line 25 : Undefined constant "aaaa"
-#0 {main}
-
-2024-07-27 14:41 : Uncaught Exception in E:\WAMP\www\framework\public\index.php, line 25 : Undefined constant "aaaa"
-#0 {main}
-

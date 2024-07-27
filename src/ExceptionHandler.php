@@ -42,6 +42,6 @@ class ExceptionHandler
         $logMessage .= PHP_EOL;
         $logMessage .= PHP_EOL;
 
-        error_log($logMessage, 3, '../logs.txt');
+        error_log($logMessage, 3, '../logs/app.exceptions.txt');
     }
 }
