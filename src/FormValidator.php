@@ -3,8 +3,8 @@
 namespace App;
 
 use App\Enums\HTMLInputType;
-use App\Forms\HTMLInputElement;
 use App\HTMLElements\HTMLFormElement;
+use App\HTMLElements\HTMLInputElement;
 use Exception;
 
 class FormValidator
@@ -57,8 +57,6 @@ class FormValidator
 
     private function validateDate(HTMLInputElement $input, string $value) : void
     {
-        
-        
         
     }
 
