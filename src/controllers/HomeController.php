@@ -29,12 +29,16 @@ class HomeController extends Controller
             ->addChild(new HTMLInputElement('animal', HTMLInputType::TEXT, 'Label'))
             ->setAttribute('class', 'd-flex');
         $forms[] = $form;
+        
+        if($this->request->getMethod() === HttpMethod::POST) new FormValidator($form);
 
         $form = clone $form;
         $form
             ->removeInput('animal')
             ->addInput('firstname', HTMLInputType::TEXT, 'Label');
         $forms[] = $form;
+
+        if($this->request->getMethod() === HttpMethod::POST) new FormValidator($form);
 
         echo $this->twig->render('index.html.twig', ['forms' => $forms]);
     }
