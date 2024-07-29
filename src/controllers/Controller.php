@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Singleton;
 use Twig\Environment;
 
 class Controller
