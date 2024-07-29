@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Containers\Route;
+use App\Enums\HttpMethod;
 use App\Request;
 use App\Traits\SingletonTrait;
 use Exception;
@@ -24,8 +25,8 @@ class Router
     private function decodeRoutes() : void
     {
         match($this->request->getMethod()) {
-            'GET' => $this->routes = json_decode(file_get_contents('../config/routes/routes.get.json'), true),
-            'POST' => $this->routes = json_decode(file_get_contents('../config/routes/routes.post.json'), true),
+            HttpMethod::GET->name => $this->routes = json_decode(file_get_contents('../config/routes/routes.get.json'), true),
+            HttpMethod::POST->name => $this->routes = json_decode(file_get_contents('../config/routes/routes.post.json'), true),
             default => throw new Exception('Request method ' . $this->request->getMethod() . ' has no routes defined.')
         };
     }
