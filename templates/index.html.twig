@@ -1,1 +1,11 @@
 <p>Bonjour le monde</p>
+
+{% for form in forms %}
+    <form action="{{ form.action }}">
+        {% for input in form.inputs %}
+            <label for="">{{ input.label }}</label>
+            <input type="{{ input.type }}" name="{{ input.name }}" id="">
+        {% endfor %}
+        {{ form.csrfToken|raw }}
+    </form>
+{% endfor %}

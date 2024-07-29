@@ -2,15 +2,33 @@
 
 namespace App\Controllers;
 
+use App\Forms\Form;
 use App\Traits\SingletonTrait;
-use Twig\Environment;
 
-class HomeController
+class HomeController extends Controller
 {
     use SingletonTrait;
-    
-    public function index(Environment $twig) 
+
+    public function __construct()
     {
-        echo $twig->render('index.html.twig', []);
+        parent::__construct();
+    }
+
+    public function index() 
+    {
+        $form = new Form();
+        $form
+            ->addInput('animal', 'text', 'Label')
+            ->addAttribute('class', 'd-flex');
+        $forms[] = $form;
+
+        $form = clone $form;
+        $form
+            ->removeInput('animal')
+            ->addInput('firstname', 'text', 'Label');
+        $forms[] = $form;
+        var_dump($forms);
+
+        echo $this->twig->render('index.html.twig', ['forms' => $forms]);
     }
 }
