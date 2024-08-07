@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Router;
+use Framework\Router;
 
 require_once '../vendor/autoload.php';
 

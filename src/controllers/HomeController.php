@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Enums\HTMLInputType;
-use App\FormValidation;
-use App\HTMLElements\HTMLFormElement;
-use App\HTMLElements\HTMLInputElement;
-use App\Request;
-use App\Traits\SingletonTrait;
-use App\Validation;
+use Framework\Services\FormValidation;
+use Framework\Contracts\Traits\SingletonTrait;
+use Framework\Controllers\Controller;
+use Framework\Enums\HTMLInputType;
+use Framework\Types\Composed\HTMLElements\HTMLFormElement;
+use Framework\Types\Composed\Request;
 
 class HomeController extends Controller
 {

@@ -1,0 +1,9 @@
+<?php
+
+namespace Framework\Enums;
+
+enum HttpMethod
+{
+    case POST;
+    case GET;
+}
