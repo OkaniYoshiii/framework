@@ -1,24 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\HTMLElements;
 
+use App\Collections\HTMLAttributeCollection;
 use App\Enums\HTMLInputType;
 use App\Enums\HttpMethod;
+use App\Exceptions\CauseEffectException;
+use App\Request;
 
 class HTMLFormElement extends HTMLElement
 {
     private const METHOD = HttpMethod::POST->name;
     private const ACTION = '';
     private array $inputs;
-    private HTMLInputElement $csrfToken;
 
     public function __construct(array $attributes = [])
     {
+        try {
+            $attributes = HTMLAttributeCollection::createFromArray($attributes);
+        } catch(CauseEffectException $e) {
+            throw new CauseEffectException('Cannot create ' . self::class, $e->getCause());
+        }
+
         parent::__construct($attributes);
-        $this->csrfToken = new HTMLInputElement('csrf_token', HTMLInputType::HIDDEN, null, ['value' => 1235]);
+        
+        $this->addChild(new HTMLInputElement('csrf_token', HTMLInputType::HIDDEN, null, ['value' => '0000']));
     }
 
-    public function addChild(HTMLElement $htmlElement): HTMLElement
+    public function addChild(HTMLElement $htmlElement) : self
     {
         parent::addChild($htmlElement);
 
@@ -30,19 +41,21 @@ class HTMLFormElement extends HTMLElement
         return $this;
     }
 
-    public function addInput(string $name, HTMLInputType $type, string $label, array $attributes = []) : self
+    public function setAttribute(string $name, string $value) : self
     {
-        $this->inputs[$name] = new HTMLInputElement($name, $type, $label, $attributes);
-
-        return $this;
+        return parent::setAttribute($name, $value);
     }
 
-    public function removeInput(string $name) : self
+    public function addInput(string $name, HTMLInputType $type, ?string $label = '', ?array $attributes = []) : self
     {
-        $childKey = array_search($this->inputs[$name], $this->getChildren(), true);
+        try {
+            $input = new HTMLInputElement($name, $type, $label, $attributes);
+        } catch(CauseEffectException $e) {
+            throw new CauseEffectException('Cannot add input to ' . self::class, $e->getCause());
+        }
         
-        if($childKey !== false) $this->removeChild($childKey);
-        unset($this->inputs[$name]);
+        $this->childs->add($input);
+        $this->inputs[] = $input;
 
         return $this;
     }
@@ -65,10 +78,5 @@ class HTMLFormElement extends HTMLElement
     public function getInputs()
     {
         return $this->inputs;
-    }
-
-    public function getCsrfToken()
-    {
-        return $this->csrfToken;
     }
 }

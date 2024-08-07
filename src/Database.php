@@ -16,7 +16,7 @@ class Database
     public function connect()
     {
         $config = Config::getInstance();
-        $config = $config->getDatabaseConfig();
+        $config = $config->get('local', 'database');
 
         $this->pdo = new PDO($config['dsn'], $config['username'], $config['password']);
     }

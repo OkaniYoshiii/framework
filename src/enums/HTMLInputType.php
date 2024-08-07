@@ -11,4 +11,5 @@ enum HTMLInputType : string
     case PASSWORD = 'password';
     case TEXT = 'text';
     case HIDDEN = 'hidden';
+    case SUBMIT = 'submit';
 }

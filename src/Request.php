@@ -18,7 +18,7 @@ class Request
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->queryString = $_SERVER['QUERY_STRING'];
-        $this->parameters = ($this->method === 'GET') ? $_GET : null;
+        $this->parameters = ($this->method === 'GET') ? $_GET : [];
     }
 
     /**

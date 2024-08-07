@@ -1,27 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\HTMLElements;
 
+use App\Collections\HTMLAttributeCollection;
 use App\Enums\HTMLInputType;
+use App\Exceptions\CauseEffectException;
+use App\Types\HTMLAttribute;
 
 class HTMLInputElement extends HTMLElement
 {
     private string $name;
     private string $type;
     private string $label;
-    private array $attributes;
 
     public function __construct(string $name, HTMLInputType $type, ?string $label = null, array $attributes = [])
     {
+        try {
+            $attributes = HTMLAttributeCollection::createFromArray($attributes);
+        } catch(CauseEffectException $e) {
+            throw new CauseEffectException('Cannot create ' . self::class, $e->getCause());
+        }
+        
         parent::__construct($attributes);
         
         $this->name = $name;
         $this->type = $type->value;
         $this->label = is_null($label) ? '' : $label;
 
-        $this->attributes['required'] = $attributes['required'] ?? true;
-        $this->attributes['disabled'] = $attributes['disabled'] ?? false;
-        $this->attributes['readonly'] = $attributes['readonly'] ?? false;
+        if($type === HTMLInputType::HIDDEN) return;
+
+        if(!$this->attributes->isset('required')) $this->attributes->add('required', new HTMLAttribute('required'));
     }
 
     public function __toString()
@@ -36,21 +46,6 @@ class HTMLInputElement extends HTMLElement
         }
             
         return '<input type="' .  $this->type . '" name="' . $this->name . '" ' . $htmlAttributes . '>';
-    }
-
-    public function getIsRequired() : bool
-    {
-        return $this->attributes['required'];
-    }
-
-    public function getIsDisabled() : bool
-    {
-        return $this->attributes['disabled'];
-    }
-
-    public function getIsReadOnly() : bool
-    {
-        return $this->attributes['readonly'];
     }
 
     /**

@@ -1,3 +1,4 @@
 {
+    "/" : "HomeController::index",
     "/login" : "HomeController::index"
 }

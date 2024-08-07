@@ -1,0 +1,9 @@
+{
+    "password" : {
+        "minLength" : 8,
+        "mustHave" : [
+            "specialChars",
+            "numbers"
+        ]
+    }
+}

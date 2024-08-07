@@ -9,29 +9,19 @@ class Config
     use SingletonTrait;
 
     private array $data;
-    private array $databaseConfig;
-    private string $secret;
 
     private function __construct()
     {
-        $this->data = json_decode(file_get_contents('../config/config.local.json'), true);
-        $this->databaseConfig = $this->data['database'];
-        $this->secret = $this->data['secret'];
+        $this->data['local'] = json_decode(file_get_contents('../config/config.local.json'), true);
+        $this->data['global'] = json_decode(file_get_contents('../config/config.global.json'), true);
     }
 
-    /**
-     * Get the value of databaseConfig
-     */ 
-    public function getDatabaseConfig()
+    public function get(string $environement, string $key) : ?array
     {
-        return $this->databaseConfig;
-    }
-
-    /**
-     * Get the value of secret
-     */ 
-    public function getSecret()
-    {
-        return $this->secret;
+        return match($environement) {
+            'local' => $this->data['local'][$key],
+            'global' => $this->data['local'][$key],
+            default => null,
+        };
     }
 }
