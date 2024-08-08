@@ -9,7 +9,7 @@ use Framework\Enums\HttpMethod;
 use Framework\Exceptions\CauseEffectException;
 use Framework\Types\Collections\HTMLAttributeCollection;
 
-class HTMLFormElement extends HTMLElement
+class HTMLFormElement extends NonVoidElement
 {
     private const METHOD = HttpMethod::POST->name;
     private const ACTION = '';
@@ -17,6 +17,8 @@ class HTMLFormElement extends HTMLElement
 
     public function __construct(array $attributes = [])
     {
+        $attributes = array_merge(['action' => self::ACTION, 'method' => self::METHOD], $attributes);
+
         try {
             $attributes = HTMLAttributeCollection::createFromArray($attributes);
         } catch(CauseEffectException $e) {
@@ -45,15 +47,19 @@ class HTMLFormElement extends HTMLElement
         return parent::setAttribute($name, $value);
     }
 
-    public function addInput(string $name, HTMLInputType $type, ?string $label = '', ?array $attributes = []) : self
+    public function addInput(string $name, HTMLInputType $type, ?HTMLLabelElement $label = null, ?array $attributes = []) : self
     {
         try {
             $input = new HTMLInputElement($name, $type, $label, $attributes);
         } catch(CauseEffectException $e) {
             throw new CauseEffectException('Cannot add input to ' . self::class, $e->getCause());
         }
+
+        $label = (is_null($label)) ? new HTMLLabelElement() : $label;
         
+        $this->childs->add($label);
         $this->childs->add($input);
+
         $this->inputs[] = $input;
 
         return $this;
@@ -77,5 +83,10 @@ class HTMLFormElement extends HTMLElement
     public function getInputs()
     {
         return $this->inputs;
+    }
+
+    protected function defineTagName() : void
+    {
+        $this->tagName = 'form';
     }
 }

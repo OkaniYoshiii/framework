@@ -6,18 +6,18 @@ namespace Framework\Types\Composed\HTMLElements;
 
 use Framework\Exceptions\CauseEffectException;
 use Framework\Types\Collections\HTMLAttributeCollection;
-use Framework\Types\Collections\HTMLElementCollection;
 use Framework\Types\Strings\HTMLAttribute;
+use Stringable;
 
-class HTMLElement
+abstract class HTMLElement implements Stringable
 {
     protected ?HTMLAttributeCollection $attributes;
-    protected ?HTMLElementCollection $childs;
+    protected string $tagName = '';
 
     public function __construct(?HTMLAttributeCollection $attributes = null)
     {
-        $this->childs = new HTMLElementCollection();
         $this->attributes = (is_null($attributes)) ? new HTMLAttributeCollection() : $attributes;
+        $this->defineTagName();
     }
 
     public function getAttribute(string $name) : string
@@ -49,20 +49,5 @@ class HTMLElement
         return $this;
     }
 
-    public function addChild(HTMLElement $htmlElement) : self
-    {
-        $this->childs->add($htmlElement);
-
-        return $this;
-    }
-
-    public function getChilds() : HTMLElementCollection
-    {
-        return $this->childs;
-    }
-
-    public function removeChild(int $index) : void
-    {
-        $this->childs->remove($index);
-    }
+    abstract protected function defineTagName() : void;
 }

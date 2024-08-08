@@ -9,6 +9,7 @@ use Framework\Contracts\Traits\SingletonTrait;
 use Framework\Controllers\Controller;
 use Framework\Enums\HTMLInputType;
 use Framework\Types\Composed\HTMLElements\HTMLFormElement;
+use Framework\Types\Composed\HTMLElements\HTMLLabelElement;
 use Framework\Types\Composed\Request;
 
 class HomeController extends Controller
@@ -30,9 +31,9 @@ class HomeController extends Controller
             ->setAttribute('novalidate', '')
             ->setAttribute('class', 'bonjour')
             // ->addChild(new HTMLInputElement('name', HTMLInputType::DATE, null))
-            ->addInput('email', HTMLInputType::EMAIL, 'Email')
-            ->addInput('password', HTMLInputType::PASSWORD, 'Mot de passe')
-            ->addInput('submit', HTMLInputType::SUBMIT, 'Envoyer');
+            ->addInput('email', HTMLInputType::EMAIL, new HTMLLabelElement('Email'))
+            ->addInput('password', HTMLInputType::PASSWORD, new HTMLLabelElement('Mot de passe'))
+            ->addInput('submit', HTMLInputType::SUBMIT, new HTMLLabelElement('Envoyer'));
         $forms[] = $form;
 
         $validation = new FormValidation($form);
@@ -46,8 +47,8 @@ class HomeController extends Controller
         $form = new HTMLFormElement();
         $form
             ->setAttribute('novalidate', '')
-            ->addInput('firstname', HTMLInputType::DATE, 'Date de passage')
-            ->addInput('submit', HTMLInputType::SUBMIT, 'Envoyer');
+            ->addInput('firstname', HTMLInputType::DATE)
+            ->addInput('submit', HTMLInputType::SUBMIT);
 
         $forms[] = $form;
 

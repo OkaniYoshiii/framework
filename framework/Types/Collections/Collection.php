@@ -14,6 +14,11 @@ abstract class Collection implements Iterator
         $this->items = $items;
     }
 
+    public function toArray() : array
+    {
+        return (array) $this->items;
+    }
+
     public function current() : object 
     {
         return $this->items[$this->position];

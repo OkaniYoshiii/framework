@@ -9,29 +9,35 @@ use Framework\Exceptions\CauseEffectException;
 use Framework\Types\Collections\HTMLAttributeCollection;
 use Framework\Types\Strings\HTMLAttribute;
 
-class HTMLInputElement extends HTMLElement
+class HTMLInputElement extends VoidElement
 {
     private string $name;
     private string $type;
-    private string $label;
+    private ?HTMLLabelElement $label = null;
 
-    public function __construct(string $name, HTMLInputType $type, ?string $label = null, array $attributes = [])
+    public function __construct(string $name, HTMLInputType $type, ?HTMLLabelElement $label = null, array $attributes = [])
     {
         try {
             $attributes = HTMLAttributeCollection::createFromArray($attributes);
         } catch(CauseEffectException $e) {
             throw new CauseEffectException('Cannot create ' . self::class, $e->getCause());
         }
+
         
         parent::__construct($attributes);
         
+        $this->label = $label;
         $this->name = $name;
         $this->type = $type->value;
-        $this->label = is_null($label) ? '' : $label;
 
         if($type === HTMLInputType::HIDDEN) return;
 
         if(!$this->attributes->isset('required')) $this->attributes->add('required', new HTMLAttribute('required'));
+    }
+
+    public function getLabel() : ?HTMLLabelElement
+    {
+        return $this->label;
     }
 
     public function __toString()
@@ -64,11 +70,8 @@ class HTMLInputElement extends HTMLElement
         return $this->type;
     }
 
-    /**
-     * Get the value of label
-     */ 
-    public function getLabel()
+    protected function defineTagName() : void
     {
-        return $this->label;
+        $this->tagName = 'input';
     }
 }

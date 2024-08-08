@@ -2,28 +2,26 @@
 
 namespace Framework\Types\Composed\HTMLElements;
 
+use Framework\Exceptions\CauseEffectException;
 use Framework\Types\Collections\HTMLAttributeCollection;
 
-class HTMLLabelElement extends HTMLElement
+class HTMLLabelElement extends NonVoidElement
 {
-    private string $value;
-
-    public function __construct(string $value, HTMLAttributeCollection $attributes)
+    public function __construct(string $innerText = '', ?array $attributes = [])
     {
+        try {
+            $attributes = HTMLAttributeCollection::createFromArray($attributes);
+        } catch(CauseEffectException $e) {
+            throw new CauseEffectException('Cannot create ' . self::class, $e->getCause());
+        }
+        
         parent::__construct($attributes);
         
-        $this->value = $value;
+        $this->innerText = $innerText;
     }
 
-    public function setValue($value)
+    protected function defineTagName() : void
     {
-        $this->value = $value;
-
-        return $this;
-    }
-
-    public function getValue()
-    {
-        return $this->value;
+        $this->tagName = 'label';
     }
 }

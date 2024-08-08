@@ -1,10 +1,21 @@
 <p>Bonjour le monde</p>
 
 {% for form in forms %}
+    <hr>
     <form action="{{ form.action }}" method="{{ form.method }}" {{ form.attributes|raw }}>
         {% for input in form.inputs %}
-            <label for="">{{ input.label }}</label>
-            <input type="{{ input.type }}" name="{{ input.name }}" {{ input.attributes|raw }}>
+            {{ input.label|raw }}
+            {{ input|raw }}
         {% endfor %}
     </form>
+    <hr>
+    {{ form|raw }}
+    <hr>
+    {{ form.openingTag|raw }}
+        {% for input in form.inputs %}
+            {{ input.label|raw }}
+            {{ input|raw }}
+        {% endfor %}
+
+    {{ form.closingTag|raw }}
 {% endfor %}
