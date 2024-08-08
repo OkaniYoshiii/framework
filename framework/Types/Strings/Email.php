@@ -3,8 +3,9 @@
 namespace Framework\Types\Strings;
 
 use Exception;
+use Stringable;
 
-class Email
+class Email implements Stringable
 {
     private string $value;
 

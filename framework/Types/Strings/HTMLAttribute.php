@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Framework\Types\Strings;
 
-class HTMLAttribute
+use Stringable;
+
+class HTMLAttribute implements Stringable
 {
     private string $name;
     private string $value;

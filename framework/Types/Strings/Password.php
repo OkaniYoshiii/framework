@@ -3,8 +3,9 @@
 namespace Framework\Types\Strings;
 
 use Exception;
+use Stringable;
 
-class Password
+class Password implements Stringable
 {
     private int $minLength = 8;
     private bool $mustHaveSpecialChars = false;
