@@ -7,6 +7,7 @@ use DateTime;
 use Exception;
 use Framework\Enums\HTMLInputType;
 use Framework\Enums\HttpMethod;
+use Framework\Session;
 use Framework\Types\Composed\HTMLElements\HTMLFormElement;
 use Framework\Types\Composed\HTMLElements\HTMLInputElement;
 use Framework\Types\Composed\Request;
@@ -19,6 +20,7 @@ class FormValidation
     private HTMLFormElement $form;
     private array $validatedData = [];
     private array $errors = [];
+    private bool $isCsrfTokenValidated = false;
 
     public function __construct(HTMLFormElement $form)
     {
@@ -60,10 +62,14 @@ class FormValidation
         {
             $inputType = HTMLInputType::from($input->getType());
 
+            $value = $_POST[$input->getName()] ?? null;
+
+            if($input->getName() === 'csrf_token') {
+                $this->validateCsrfToken($value);
+            }
+
             if($inputType === HTMLInputType::SUBMIT) continue;
             if($inputType === HTMLInputType::HIDDEN) continue;
-
-            $value = $_POST[$input->getName()] ?? null;
 
             $this->validateBaseData($input, $value);
 
@@ -76,6 +82,8 @@ class FormValidation
                 HTMLInputType::TEXT => is_string($value) ? $value : null,
             };
         }
+
+        if(!$this->isCsrfTokenValidated) throw new Exception('Invalid CSRF token');
     }
 
     private function validateBaseData(HTMLInputElement $input, ?string $value) : void
@@ -93,6 +101,19 @@ class FormValidation
         $isReadOnly = ($attributes->isset('readonly'));
         $defaultValue = ($attributes->isset('value')) ? $input->getAttribute('value') : '';
         if($isReadOnly && $value !== $defaultValue) throw new Exception();
+    }
+
+    private function validateCsrfToken(mixed $value) : void
+    {
+        $session = Session::getInstance();
+
+        echo $session->get('csrf_token');
+        echo '<br>';
+        echo $value;
+
+        if($session->get('csrf_token') !== $value) throw new Exception('Invalid CSRF token');
+
+        $this->isCsrfTokenValidated = true;
     }
 
     private function getValidatedDate(string $value) : DateTime|null

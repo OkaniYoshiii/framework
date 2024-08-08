@@ -6,6 +6,7 @@ namespace Framework\Types\Composed\HTMLElements;
 
 use Framework\Enums\HTMLInputType;
 use Framework\Exceptions\CauseEffectException;
+use Framework\Session;
 use Framework\Types\Collections\HTMLAttributeCollection;
 use Framework\Types\Strings\HTMLAttribute;
 
@@ -17,13 +18,15 @@ class HTMLInputElement extends VoidElement
 
     public function __construct(string $name, HTMLInputType $type, ?HTMLLabelElement $label = null, array $attributes = [])
     {
+        $attributes['type'] = $type->value;
+        $attributes['name'] = $name;
+
         try {
             $attributes = HTMLAttributeCollection::createFromArray($attributes);
         } catch(CauseEffectException $e) {
             throw new CauseEffectException('Cannot create ' . self::class, $e->getCause());
         }
 
-        
         parent::__construct($attributes);
         
         $this->label = $label;
@@ -40,18 +43,15 @@ class HTMLInputElement extends VoidElement
         return $this->label;
     }
 
-    public function __toString()
+    
+    public function __toString(): string
     {
-        $htmlAttributes = '';
-        foreach($this->attributes as $name => $value)
-        {
-            if($value === false) continue;
-            $htmlAttributes .= $name;
-            if($value === true) continue;
-            $htmlAttributes .= '=' . $value . ' ';
+        if($this->getName() === 'csrf_token') {
+            $session = Session::getInstance();
+            $this->setAttribute('value', $session->get('csrf_token'));
         }
-            
-        return '<input type="' .  $this->type . '" name="' . $this->name . '" ' . $htmlAttributes . '>';
+
+        return parent::__toString();
     }
 
     /**

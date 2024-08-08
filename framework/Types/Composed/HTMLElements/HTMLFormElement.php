@@ -7,6 +7,7 @@ namespace Framework\Types\Composed\HTMLElements;
 use Framework\Enums\HTMLInputType;
 use Framework\Enums\HttpMethod;
 use Framework\Exceptions\CauseEffectException;
+use Framework\Session;
 use Framework\Types\Collections\HTMLAttributeCollection;
 
 class HTMLFormElement extends NonVoidElement
@@ -17,6 +18,7 @@ class HTMLFormElement extends NonVoidElement
 
     public function __construct(array $attributes = [])
     {
+        
         $attributes = array_merge(['action' => self::ACTION, 'method' => self::METHOD], $attributes);
 
         try {
@@ -27,7 +29,7 @@ class HTMLFormElement extends NonVoidElement
 
         parent::__construct($attributes);
         
-        $this->addChild(new HTMLInputElement('csrf_token', HTMLInputType::HIDDEN, null, ['value' => '0000']));
+        $this->addChild(new HTMLInputElement('csrf_token', HTMLInputType::HIDDEN, null));
     }
 
     public function addChild(HTMLElement $htmlElement) : self

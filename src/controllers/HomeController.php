@@ -24,22 +24,21 @@ class HomeController extends Controller
         parent::__construct();
     }
 
-    public function index() 
+    public function index() : array
     {
         $form = new HTMLFormElement(['novalidate' => 'test', 'data-test' => 'bonjour']);
         $form
             ->setAttribute('novalidate', '')
             ->setAttribute('class', 'bonjour')
             // ->addChild(new HTMLInputElement('name', HTMLInputType::DATE, null))
-            ->addInput('email', HTMLInputType::EMAIL, new HTMLLabelElement('Email'))
-            ->addInput('password', HTMLInputType::PASSWORD, new HTMLLabelElement('Mot de passe'))
-            ->addInput('submit', HTMLInputType::SUBMIT, new HTMLLabelElement('Envoyer'));
+            ->addInput('email', HTMLInputType::EMAIL, new HTMLLabelElement('Email'), ['class' => 'bonjour'])
+            ->addInput('password', HTMLInputType::PASSWORD, new HTMLLabelElement('Mot de passe'), ['class' => 'bonjour'])
+            ->addInput('submit', HTMLInputType::SUBMIT, new HTMLLabelElement('Envoyer'), ['class' => 'bonjour']);
         $forms[] = $form;
 
         $validation = new FormValidation($form);
         if($validation->isSuccessful()) {
-            echo 'Bonjour';
-            die();
+            
         } else {
             echo implode(', ', $validation->getErrors());
         }
@@ -60,6 +59,6 @@ class HomeController extends Controller
             echo implode(', ', $validation->getErrors());
         }
 
-        echo $this->twig->render('index.html.twig', ['forms' => $forms]);
+        return ['template' => 'index.html.twig', 'variables' => ['forms' => $forms]];
     }
 }
