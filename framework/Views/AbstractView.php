@@ -2,8 +2,6 @@
 
 namespace Framework\Views;
 
-use Framework\Forms\HTMLElement;
-
 abstract class AbstractView
 {
     abstract public function render() : void;

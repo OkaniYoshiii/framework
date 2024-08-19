@@ -2,9 +2,10 @@
 
 namespace Framework\Forms;
 
+use Framework\Exceptions\CauseEffectException;
 use Framework\Views\AbstractView;
 
-abstract class HTMLElement
+class HTMLElement
 {
     protected string $id = '';
     protected array $attributes = [];
@@ -24,15 +25,18 @@ abstract class HTMLElement
         $this->view->render($part);
     }
 
-    abstract protected function initializeView() : void;
-    
-    // A tester
-    // protected function initializeView() : void
-    // {
-    //     $viewClass = self::class . 'View';
+    protected function initializeView() : void
+    {
+        // Retire le namespace de la classe et garde le nom uniquement
+        $classParts = explode('\\', static::class);
+        $className = end($classParts);
 
-    //     new $viewClass($this);
-    // }
+        $viewClass = 'Framework\\Views\\' . $className . 'View';
+
+        if(!class_exists($viewClass)) throw new CauseEffectException('Cannot create a view for class ' . static::class, static::class . ' need to have an AbstractView called ' . $viewClass);
+
+        $this->view = new $viewClass($this);
+    }
 
     public function setAttributes(array $attributes) : static
     {

@@ -47,11 +47,6 @@ final class Form extends HTMLElement
             ->setAttributes(['value' => 'Envoyer']);
     }
 
-    public function initializeView() : void
-    {
-        $this->view = new FormView($this);
-    }   
-
     public function addInput(string $name, HTMLInputType $type, array $attributes = [], bool $required = true) : self
     {
         if(isset($this->inputs[$name])) throw new Exception('Cannot add input to Form : Input with $name "' . $name . '" already exists');

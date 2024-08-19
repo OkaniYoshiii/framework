@@ -19,11 +19,6 @@ class Input extends HTMLElement
         $this->label = new Label($this);
     }
 
-    protected function initializeView() : void
-    {
-        $this->view = new InputView($this);
-    }
-
     public function setAttribute(string $name, string|bool|float $value): static
     {
         return parent::setAttribute($name, $value);

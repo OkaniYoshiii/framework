@@ -19,11 +19,6 @@ class Label extends HTMLElement
         return $this->input;
     }
 
-    public function initializeView() : void
-    {
-        $this->view = new LabelView($this);
-    }
-
     public function setValue(string $value) : self
     {
         $this->value = $value;
