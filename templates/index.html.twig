@@ -1,21 +1,15 @@
-<p>Bonjour le monde</p>
+{% extends 'base.html.twig' %}
 
-{% for form in forms %}
-    <hr>
-    <form action="{{ form.action }}" method="{{ form.method }}" {{ form.attributes|raw }}>
-        {% for input in form.inputs %}
-            {{ input.label|raw }}
-            {{ input|raw }}
-        {% endfor %}
-    </form>
-    <hr>
-    {{ form|raw }}
-    <hr>
-    {{ form.openingTag|raw }}
-        {% for input in form.inputs %}
-            {{ input.label|raw }}
-            {{ input|raw }}
-        {% endfor %}
+{% block main %}
+    {{ form.render() }}
 
-    {{ form.closingTag|raw }}
-{% endfor %}
+    <hr>
+
+    {{ form.render('start') }}
+        {% for input in form.inputs %}
+            {{ input.label.render() }}
+            {{ input.render('self') }}
+        {% endfor %}
+        {{ form.render('submit') }}
+    {{ form.render('end') }}
+{% endblock %}

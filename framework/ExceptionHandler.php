@@ -2,7 +2,7 @@
 
 namespace Framework;
 
-use App\Traits\SingletonTrait;
+use Framework\Contracts\Traits\SingletonTrait;
 use Throwable;
 
 class ExceptionHandler

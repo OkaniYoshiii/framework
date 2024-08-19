@@ -2,7 +2,8 @@
 
 namespace Framework;
 
-use App\Traits\SingletonTrait;
+use Framework\Contracts\Traits\SingletonTrait;
+use Framework\Types\Composed\Config;
 use PDO;
 use PDOStatement;
 

@@ -2,8 +2,8 @@
 
 namespace Framework\Enums;
 
-enum HttpMethod
+enum HTTPMethod : string
 {
-    case POST;
-    case GET;
+    case POST = 'POST';
+    case GET = 'GET';
 }

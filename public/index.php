@@ -16,6 +16,8 @@ $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
 $session = Session::getInstance();
 $session->start();
 
+if(is_null($session->get('csrf_token'))) $session->set('csrf_token', bin2hex(random_bytes(20)));
+
 $router = Router::getInstance();
 $route = $router->getRoute();
 $controller = $route->getController();

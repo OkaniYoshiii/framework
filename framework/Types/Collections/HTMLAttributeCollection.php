@@ -26,6 +26,9 @@ class HTMLAttributeCollection extends AssociativeCollection
         
         foreach($attributes as $key => $value)
         {
+            if($value === false) continue;
+            if($value === true) $value = '';
+            
             if(!is_string($key)) throw new CauseEffectException('Cannot create HTMLAttributeCollection from Array', 'Argument $attributes must be an associative array.');
             if(!is_string($value)) throw new CauseEffectException('Cannot create HTMLAttributeCollection from Array', 'Argument $attributes must only contain values of type string. Received ' . gettype($value) . '.');
 
@@ -39,11 +42,6 @@ class HTMLAttributeCollection extends AssociativeCollection
     public function get(string $key): HTMLAttribute
     {
         return parent::get($key);
-    }
-
-    public function __toString()
-    {
-        return implode(' ', $this->items);
     }
 
     public function current() : HTMLAttribute

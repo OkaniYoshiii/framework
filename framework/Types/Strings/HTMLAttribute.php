@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Framework\Types\Strings;
 
+use Framework\Session;
 use Stringable;
 
 class HTMLAttribute implements Stringable
