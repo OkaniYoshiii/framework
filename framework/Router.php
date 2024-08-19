@@ -5,8 +5,8 @@ namespace Framework;
 use Exception;
 use Framework\Contracts\Traits\SingletonTrait;
 use Framework\Enums\HttpMethod;
-use Framework\Types\Composed\Request;
-use Framework\Types\Composed\Route;
+use Framework\Types\Request;
+use Framework\Types\Route;
 
 class Router
 {

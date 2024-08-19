@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use Framework\Contracts\Traits\SingletonTrait;
-use Framework\Controllers\Controller;
-use Framework\Types\Composed\Request;
+use Framework\Types\Request;
 
-class HomeController extends Controller
+class HomeController
 {
     use SingletonTrait;
 
@@ -17,7 +16,6 @@ class HomeController extends Controller
     public function __construct()
     {
         $this->request = Request::getInstance();
-        parent::__construct();
     }
 
     public function index() : array

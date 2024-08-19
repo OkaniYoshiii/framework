@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Types\Composed;
+namespace Framework\Types;
 
 class Route
 {

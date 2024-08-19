@@ -9,8 +9,8 @@ use Exception;
 use Framework\Enums\HTMLInputType;
 use Framework\Enums\HTTPMethod;
 use Framework\Session;
-use Framework\Types\Composed\Request;
-use Framework\Types\Composed\Route;
+use Framework\Types\Request;
+use Framework\Types\Route;
 use Framework\Views\FormView;
 
 final class Form extends HTMLElement
