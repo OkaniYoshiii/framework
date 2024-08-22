@@ -27,6 +27,6 @@ $method = $route->getMethod();
 $response = $controller->{$method}();
 
 $session->set('csrf_token', bin2hex(random_bytes(20)));
-echo $session->get('csrf_token');
+// echo $session->get('csrf_token');
 
 echo $twig->render($response['template'], $response['variables']);
