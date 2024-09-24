@@ -1,4 +1,4 @@
 RewriteEngine on
 RewriteCond %{REQUEST_URI} !public/
-RewriteCond %{REQUEST_URI} !public/assets/"
+RewriteCond %{REQUEST_URI} !public/assets/
 RewriteRule (.*) /public/index.php [L]

@@ -1,5 +1,0 @@
-vendor
-node_modules
-public/uploads
-config/config.local.json
-logs/*

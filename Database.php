@@ -3,7 +3,7 @@
 namespace Framework;
 
 use Framework\Contracts\Traits\SingletonTrait;
-use Framework\Types\Composed\Config;
+use Framework\Types\Config;
 use PDO;
 use PDOStatement;
 
