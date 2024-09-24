@@ -9,6 +9,7 @@ function copyDirectory($source, $destination) {
         mkdir($destination, 0755, true);
     }
     $files = scandir($source);
+    if(empty($files)) mkdir($source, $destination);
     foreach ($files as $file) {
         if ($file !== '.' && $file !== '..') {
             $sourceFile = $source . '/' . $file;
