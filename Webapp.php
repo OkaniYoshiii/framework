@@ -2,6 +2,7 @@
 
 namespace Framework;
 
+use Dotenv\Dotenv;
 use Framework\Router;
 use Framework\Session;
 
@@ -11,6 +12,9 @@ class Webapp
     {
         $loader = new \Twig\Loader\FilesystemLoader('../templates');
         $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
+
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
 
         $session = Session::getInstance();
         $session->start();
