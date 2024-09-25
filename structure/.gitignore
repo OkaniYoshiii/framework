@@ -3,4 +3,4 @@ vendor
     public/uploads
     config/config.local.json
     logs/*
-    .env
+    .env.local

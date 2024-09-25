@@ -13,7 +13,10 @@ class Webapp
         $loader = new \Twig\Loader\FilesystemLoader('../templates');
         $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
 
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env');
+        $dotenv->load();
+
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env.local');
         $dotenv->load();
 
         $session = Session::getInstance();
