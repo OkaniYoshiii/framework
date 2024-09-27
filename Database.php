@@ -3,7 +3,6 @@
 namespace Framework;
 
 use Framework\Contracts\Traits\SingletonTrait;
-use Framework\Types\Config;
 use PDO;
 use PDOStatement;
 
@@ -14,12 +13,19 @@ class Database
     private ?PDO $pdo = null;
     private ?PDOStatement $stmt = null;
 
-    public function connect()
+    public function connectAsAdmin() : void
     {
-        $config = Config::getInstance();
-        $config = $config->get('local', 'database');
+        $this->pdo = new PDO('mysql:host=' . $_ENV['DATABASE_HOST'], $_ENV['DATABASE_PASSWORD']);
+    }
 
-        $this->pdo = new PDO($config['dsn'], $config['username'], $config['password']);
+    public function connect(bool $asAdmin = false)
+    {
+        $this->pdo = new PDO('mysql:host=' . $_ENV['DATABASE_HOST'] . ';dbname=' . $_ENV['DATABASE_NAME']);
+    }
+
+    public function create() 
+    {
+        $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $_ENV['DATABASE_NAME']);
     }
 
     public function disconnect()

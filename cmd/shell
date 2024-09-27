@@ -1,0 +1,7 @@
+<?php
+
+use Framework\ShellProgram;
+
+require_once './vendor/autoload.php';
+
+ShellProgram::start($argv);
