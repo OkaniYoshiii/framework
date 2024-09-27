@@ -4,20 +4,24 @@ namespace Framework\Commands;
 
 use Exception;
 use Framework\Contracts\Interfaces\ShellCommand;
+use Framework\Database;
+use Framework\Enums\DataType;
 use Framework\Enums\StringCase;
 use Framework\Enums\TablePropertyType;
 use Framework\Exceptions\IncorrectStringCaseException;
 use Framework\Helpers\StringHelper;
 use Framework\ShellProgram;
+use Framework\Types\ObjectCollection;
 use Framework\Types\TableProperty;
 
 class MakeEntity implements ShellCommand
 {
     private static string $entityName;
-    private static array $entityProperties = [];
+    private static ObjectCollection $entityProperties;
 
     public static function execute(array $options) : void
     {
+        self::$entityProperties = new ObjectCollection(TableProperty::class);
         self::createTable();
     }
 
@@ -31,10 +35,16 @@ class MakeEntity implements ShellCommand
 
         $isValidated = self::askValidate();
 
-        // $database = Database::getInstance();
-        // $database->connect();
+        if($isValidated) {
+            $database = Database::getInstance();
+            $database->connect();
 
-        // $database->getPdo()->query('CREATE TABLE IF NOT EXISTS ' . $tableName . ' (  )');
+            // $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
+            // $fields = 
+            // $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ',$fields) . ')';
+            // var_dump($sqlQuery);
+            // $database->getPdo()->query($sqlQuery);
+        }
     }
 
     private static function askClassName() : string
@@ -63,7 +73,7 @@ class MakeEntity implements ShellCommand
         $property['isNullable'] = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
 
         $property = new TableProperty(...$property);
-        self::$entityProperties[] = $property;
+        self::$entityProperties->addItem($property);
 
         $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
         ShellProgram::addBreakLine();
@@ -101,7 +111,7 @@ class MakeEntity implements ShellCommand
     private static function buildEntityRepresentation() : string
     {
         $entityName = self::$entityName;
-        $entityProperties = implode(PHP_EOL . "\t- ", self::$entityProperties);
+        $entityProperties = implode(PHP_EOL . "\t- ", self::$entityProperties->getItems());
 
         return <<<ENTITY
         Entité : $entityName;

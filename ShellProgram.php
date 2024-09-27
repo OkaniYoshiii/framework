@@ -31,7 +31,7 @@ class ShellProgram
     public static function askOpenEndedQuestion(string $question) : string
     {
         echo $question;
-        echo  PHP_EOL;
+        echo PHP_EOL;
         $handle = fopen("php://stdin","r");
         $answer = fgets($handle);
         fclose($handle);
@@ -52,6 +52,7 @@ class ShellProgram
      */
     public static function askCloseEndedQuestion(string $question, array $answers) : string
     {
+        $question = $question . ' (' . implode('/', $answers) . ')';
         $answer = self::askOpenEndedQuestion($question);
 
         if(!in_array($answer,$answers) ) {
