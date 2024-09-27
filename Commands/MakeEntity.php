@@ -5,9 +5,11 @@ namespace Framework\Commands;
 use Exception;
 use Framework\Contracts\Interfaces\ShellCommand;
 use Framework\Enums\StringCase;
+use Framework\Enums\TablePropertyType;
 use Framework\Exceptions\IncorrectStringCaseException;
 use Framework\Helpers\StringHelper;
 use Framework\ShellProgram;
+use Framework\Types\TableProperty;
 
 class MakeEntity implements ShellCommand
 {
@@ -21,21 +23,13 @@ class MakeEntity implements ShellCommand
 
     private static function createTable() : void
     {
-        self::$entityName = ShellProgram::askQuestion('Quel nom de classe souhaitez vous donner à votre entité ?' . PHP_EOL);
+        self::$entityName = self::askClassName();
         ShellProgram::addBreakLine();
 
-        // var_dump(StringHelper::isCamelCase(self::$entityName), StringHelper::isSnakeCase(self::$entityName));
-
-        if(!StringHelper::isTitleCase(self::$entityName)) {
-            throw new IncorrectStringCaseException(self::$entityName, [StringCase::TITLE_CASE]);
-        }
-
-        self::askAddingProperties();
+        self::askProperties();
         ShellProgram::addBreakLine();
 
-        $entityRepresentation = self::buildEntityRepresentation();
-        $isValidated = ShellProgram::askQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . $entityRepresentation . PHP_EOL . 'Êtes vous sur de vos choix ? (Oui/Non)', ['Oui', 'Non']);
-
+        $isValidated = self::askValidate();
 
         // $database = Database::getInstance();
         // $database->connect();
@@ -43,31 +37,76 @@ class MakeEntity implements ShellCommand
         // $database->getPdo()->query('CREATE TABLE IF NOT EXISTS ' . $tableName . ' (  )');
     }
 
-    private static function askAddingProperties() : void
+    private static function askClassName() : string
     {
-        $property = ShellProgram::askQuestion('Ajoutez une propriété à cette classe :' . PHP_EOL);
-        self::$entityProperties[] = $property;
+        $entityName = ShellProgram::askOpenEndedQuestion('Quel nom de classe souhaitez vous donner à votre entité ?');
+
+        if(!StringHelper::isTitleCase($entityName)) {
+            echo (new IncorrectStringCaseException($entityName, [StringCase::TITLE_CASE]))->getMessage();
+            echo PHP_EOL;
+            call_user_func(__METHOD__);
+        }
+
+        return $entityName;
+    }
+
+    private static function askProperties() : void
+    {
+        $property['name'] = self::askPropertyName();
+
         ShellProgram::addBreakLine();
 
-        if(!StringHelper::isCamelCase($property) && !StringHelper::isSnakeCase($property)) {
-            throw new IncorrectStringCaseException($property, [StringCase::SNAKE_CASE, StringCase::CAMEL_CASE]);
+        $property['type'] = self::askPropertyType();
+
+        ShellProgram::addBreakLine();
+
+        $property['isNullable'] = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
+
+        $property = new TableProperty(...$property);
+        self::$entityProperties[] = $property;
+
+        $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
+        ShellProgram::addBreakLine();
+        
+        if($isAddingAnotherProperty) {
+            call_user_func(__METHOD__);
+        }
+    }
+
+    private static function askPropertyName() : string
+    {
+        $name = ShellProgram::askOpenEndedQuestion('Ajoutez une propriété à cette classe :');
+
+        if(!StringHelper::isCamelCase($name) && !StringHelper::isSnakeCase($name)) {
+            echo (new IncorrectStringCaseException($name, [StringCase::SNAKE_CASE, StringCase::CAMEL_CASE]))->getMessage();
+            echo PHP_EOL;
+            call_user_func(__METHOD__);
         }
 
-        $isAddingAnotherProperty = ShellProgram::askQuestion('Souhaitez-vous rajouter une propriété ? (Oui/Non)' . PHP_EOL, ['Oui', 'Non']);
-        
-        if($isAddingAnotherProperty === 'Oui') {
-            ShellProgram::addBreakLine();
-            self::askAddingProperties();
-        }
+        return $name;
+    }
+
+    private static function askPropertyType() : TablePropertyType
+    {
+        $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', TablePropertyType::values());
+
+        return TablePropertyType::from($type);
+    }
+
+    private static function askValidate() : bool
+    {
+        return ShellProgram::askBooleanQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . PHP_EOL . self::buildEntityRepresentation() . PHP_EOL . 'Êtes vous sur de vos choix ?');
     }
 
     private static function buildEntityRepresentation() : string
     {
         $entityName = self::$entityName;
-        $entityProperties = implode(', ', self::$entityProperties);
+        $entityProperties = implode(PHP_EOL . "\t- ", self::$entityProperties);
+
         return <<<ENTITY
         Entité : $entityName;
-        Propriétés : $entityProperties
+        Propriétés :
+        \t- $entityProperties
         ENTITY;
     }
 }
