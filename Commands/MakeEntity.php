@@ -30,7 +30,8 @@ class MakeEntity implements ShellCommand
         $isValidated = self::askValidate();
         ShellProgram::addBreakLine();
         if($isValidated) {
-            self::createTable();
+            self::saveEntityAsJSON();
+            // self::createTable();
         }
 
         $isAddingAnotherProperty = self::askAddAnotherEntity();
@@ -40,6 +41,27 @@ class MakeEntity implements ShellCommand
         }
 
         self::$database->disconnect();
+    }
+
+    private static function saveEntityAsJSON() : void
+    {
+        $entity = ['name' => self::$entityName, 'table' => StringHelper::camelCaseToSnakeCase(self::$entityName)];
+        $entity['properties'] = array_map(function(TableProperty $property) {
+            return [
+                'name' => $property->getName(),
+                'field' => TableProperty::getMappedName($property->getName()),
+                'type' => $property->getType()->value,
+                'isNullable' => $property->getIsNullable(),
+            ];
+        }, self::$entityProperties->getItems());
+
+        $cacheDir = './framework/cache/';
+        if(is_dir($cacheDir)) {
+            file_put_contents('./framework/cache/' . $entity['name'] . '.json', json_encode($entity));
+        } else {
+            mkdir('./framework/cache/');
+            file_put_contents('./framework/cache/' . $entity['name'] . '.json', json_encode($entity));
+        }
     }
 
     private static function createTable() : void
