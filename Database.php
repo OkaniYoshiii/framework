@@ -28,6 +28,13 @@ class Database
         $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $_ENV['DATABASE_NAME']);
     }
 
+    public function createTable(string $table, string ...$fields) : void
+    {
+        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
+        $pdo = $this->getPdo();
+        $pdo->query($sqlQuery);
+    }
+
     public function disconnect()
     {
         $this->pdo = null;

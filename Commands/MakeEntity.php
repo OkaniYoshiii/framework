@@ -43,10 +43,9 @@ class MakeEntity implements ShellCommand
         $database->connect();
 
         $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
-        $fields = array_map(fn(TableProperty $property) => $property->getDatabaseMapping(), self::$entityProperties->getItems());
-        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
-        $pdo = $database->getPdo();
-        $pdo->query($sqlQuery);
+        $fields = array_map(fn(TableProperty $property) : string => $property->getDatabaseMapping(), self::$entityProperties->getItems());
+
+        $database->createTable($table, ...$fields);
     }
 
     private static function askEntityConfiguration() : void
