@@ -7,6 +7,7 @@ use Framework\Database;
 use Framework\Enums\TableRelation;
 use Framework\Helpers\StringHelper;
 use Framework\ShellProgram;
+use Framework\Types\EntityDto;
 
 class LinkEntity implements ShellCommand
 {
@@ -46,7 +47,21 @@ class LinkEntity implements ShellCommand
 
     private static function persistRelation() : void
     {
+        $entityDataPath = './framework/cache/' . self::$entityName . '.json';
+        $linkedEntityDataPath = './framework/cache/' . self::$linkedEntityName . '.json';
 
+        if(!file_exists($entityDataPath)  || !file_exists($linkedEntityDataPath)) {
+            ShellProgram::displayErrorMessage('Afin de pouvoir persister la relation en base de données, des fichiers de configuration doivent être générés par la commande : ' . MakeEntity::CMD_NAME . '. Or, ces fichiers n\'existent pas');
+            ShellProgram::close();
+        }
+
+        $entity = json_decode(file_get_contents($entityDataPath), true);
+        $linkedEntity = json_decode(file_get_contents($linkedEntityDataPath), true);
+
+        $entity = new EntityDto($entity['name'], $entity['primaryKey'], ...$entity['properties']);
+        $linkedEntity = new EntityDto($linkedEntity['name'], $linkedEntity['primaryKey'], ...$linkedEntity['properties']);
+
+        self::$database->addForeignkey($entity, $linkedEntity);
     }
 
     private static function askLinkedTo() : string

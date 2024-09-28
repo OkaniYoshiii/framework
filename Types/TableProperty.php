@@ -16,6 +16,7 @@ class TableProperty
     private readonly bool $isNullable;
     private bool $isPrimaryKey = false;
     private bool $isUnsigned = false;
+
     public function __construct(string $name, TablePropertyType $type, bool $isNullable)
     {
         $this->name = $name;
@@ -85,5 +86,10 @@ class TableProperty
     public static function getMappedName(string $name) : string
     {
         return StringHelper::camelCaseToSnakeCase($name);
+    }
+
+    public function toArray() : array
+    {
+        return get_object_vars($this);
     }
 }

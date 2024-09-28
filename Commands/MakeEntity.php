@@ -8,6 +8,7 @@ use Framework\Database;
 use Framework\Enums\TablePropertyType;
 use Framework\Helpers\StringHelper;
 use Framework\ShellProgram;
+use Framework\Types\EntityDto;
 use Framework\Types\ObjectCollection;
 use Framework\Types\TableProperty;
 
@@ -46,23 +47,15 @@ class MakeEntity implements ShellCommand
 
     private static function saveEntityAsJSON() : void
     {
-        $entity = ['name' => self::$entityName, 'table' => StringHelper::camelCaseToSnakeCase(self::$entityName)];
-        $entity['properties'] = array_map(function(TableProperty $property) {
-            return [
-                'name' => $property->getName(),
-                'field' => TableProperty::getMappedName($property->getName()),
-                'type' => $property->getType()->value,
-                'isNullable' => $property->getIsNullable(),
-            ];
-        }, self::$entityProperties->getItems());
-        $entity['primaryKey'] = self::$primaryKey;
+        $properties = array_map(fn(TableProperty $property) => $property->toArray(), self::$entityProperties->getItems());
+        $entity = new EntityDto(self::$entityName, self::$primaryKey, ...$properties);
 
         $cacheDir = './framework/cache/';
         if(is_dir($cacheDir)) {
-            file_put_contents('./framework/cache/' . $entity['name'] . '.json', json_encode($entity));
+            file_put_contents('./framework/cache/' . $entity->getName() . '.json', json_encode($entity->toArray()));
         } else {
             mkdir('./framework/cache/');
-            file_put_contents('./framework/cache/' . $entity['name'] . '.json', json_encode($entity));
+            file_put_contents('./framework/cache/' . $entity->getName() . '.json', json_encode($entity->toArray()));
         }
     }
 

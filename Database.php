@@ -3,6 +3,7 @@
 namespace Framework;
 
 use Framework\Contracts\Traits\SingletonTrait;
+use Framework\Types\EntityDto;
 use PDO;
 use PDOStatement;
 
@@ -52,6 +53,14 @@ class Database
         $results = $this->stmt->fetchAll(PDO::FETCH_COLUMN);
 
         return $results;
+    }
+
+    public function addForeignkey(EntityDto $entity, EntityDto $linkedEntity) : void
+    {
+        $sqlQuery = 'ALTER TABLE ' . $entity->getTable() . ' ADD ' . $linkedEntity->getPrimarykey() . ' INT(11) UNSIGNED NOT NULL;';
+        $sqlQuery .= 'ALTER TABLE ' . $entity->getTable() . ' ADD FOREIGN KEY (' . $linkedEntity->getPrimarykey() . ') REFERENCES ' .  $linkedEntity->getTable() . '(' . $linkedEntity->getPrimarykey() . ');';
+        
+        self::$pdo->query($sqlQuery);
     }
 
     public function disconnect()
