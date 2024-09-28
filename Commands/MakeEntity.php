@@ -45,9 +45,8 @@ class MakeEntity implements ShellCommand
         $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
         $fields = array_map(fn(TableProperty $property) => $property->getDatabaseMapping(), self::$entityProperties->getItems());
         $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
-        echo $sqlQuery;
-        // $pdo = $database->getPdo();
-        // $pdo->query($sqlQuery);
+        $pdo = $database->getPdo();
+        $pdo->query($sqlQuery);
     }
 
     private static function askEntityConfiguration() : void
@@ -113,8 +112,6 @@ class MakeEntity implements ShellCommand
         $property->setLength(11);
         $property->setIsPrimaryKey(true);
         $property->setIsUnsigned(true);
-
-        echo $property;
 
         self::$entityProperties->addItem($property);
     }

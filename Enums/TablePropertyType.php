@@ -23,7 +23,7 @@ enum TablePropertyType : string
             self::DATETIME => 'DATETIME',
             self::TEXT => 'TEXT',
             self::PASSWORD => 'VARCHAR',
-            self::BOOLEAN => 'TEXT',
+            self::BOOLEAN => 'TINYINT',
         };
     }
 
