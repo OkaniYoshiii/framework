@@ -31,7 +31,7 @@ class MakeEntity implements ShellCommand
         ShellProgram::addBreakLine();
         if($isValidated) {
             self::saveEntityAsJSON();
-            // self::createTable();
+            self::createTable();
         }
 
         $isAddingAnotherProperty = self::askAddAnotherEntity();
