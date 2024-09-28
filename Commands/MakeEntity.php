@@ -23,9 +23,17 @@ class MakeEntity implements ShellCommand
     {
         self::$entityProperties = new ObjectCollection(TableProperty::class);
         self::askEntityConfiguration();
+
         $isValidated = self::askValidate();
+        ShellProgram::addBreakLine();
         if($isValidated) {
             self::createTable();
+        }
+
+        $isAddingAnotherProperty = self::askAddAnotherEntity();
+        ShellProgram::addBreakLine();
+        if($isAddingAnotherProperty){
+            call_user_func(__METHOD__, $options);
         }
     }
 
@@ -142,5 +150,10 @@ class MakeEntity implements ShellCommand
         Propriétés :
         \t- $entityProperties
         ENTITY;
+    }
+
+    private static function askAddAnotherEntity() : bool
+    {
+        return ShellProgram::askBooleanQuestion('Voulez vous créer une nouvelle entité ?');
     }
 }
