@@ -69,7 +69,7 @@ class TableProperty
 
     public function getDatabaseMapping() : string
     {
-        $name = StringHelper::camelCaseToSnakeCase($this->getName());
+        $name = self::getMappedName($this->name);
         $type =  $this->getType()->mapping();
         $length = ($this->length !== null) ? '(' . $this->length . ')' : '';
         $isNullable = ($this->getIsNullable()) ? 'NULL' : 'NOT NULL';
@@ -77,5 +77,13 @@ class TableProperty
         $isUnsigned = ($this->isUnsigned) ? 'UNSIGNED' : '';
 
         return implode(' ', [$name, $type, $length, $isUnsigned, $isNullable, $isPrimaryKey]);
+    }
+
+    /**
+     * Retourne une chaine de caractères formattée comme une table de la base de données
+     */
+    public static function getMappedName(string $name) : string
+    {
+        return StringHelper::camelCaseToSnakeCase($name);
     }
 }

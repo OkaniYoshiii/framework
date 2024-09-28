@@ -45,6 +45,15 @@ class Database
         return ($result !== false);
     }
 
+    public function getTables() : array
+    {
+        $sqlQuery = 'SHOW TABLES';
+        $this->stmt = $this->pdo->query($sqlQuery);
+        $results = $this->stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        return $results;
+    }
+
     public function disconnect()
     {
         $this->pdo = null;

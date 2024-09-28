@@ -3,13 +3,11 @@
 namespace Framework;
 
 use Dotenv\Dotenv;
-use Exception;
 use Framework\Commands\DatabaseCreate;
+use Framework\Commands\Init;
 use Framework\Commands\MakeEntity;
+use Framework\Commands\ModifyEntity;
 use Framework\Enums\DataType;
-use Framework\Exceptions\IncorrectObjectCollectionType;
-use Framework\Shell\Commands\Init;
-use Framework\Types\ObjectCollection;
 
 class ShellProgram
 {
@@ -19,9 +17,10 @@ class ShellProgram
         $dotenv->load();
 
         match($argv[1]) {
-            'database:create' => DatabaseCreate::execute([]),
-            'init' => Init::execute([]),
-            'make:entity' => MakeEntity::execute([]),
+            DatabaseCreate::CMD_NAME => DatabaseCreate::execute(),
+            Init::CMD_NAME => Init::execute(),
+            MakeEntity::CMD_NAME => MakeEntity::execute(),
+            ModifyEntity::CMD_NAME => ModifyEntity::execute(),
             default => null,
         };
     }

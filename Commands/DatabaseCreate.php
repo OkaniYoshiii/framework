@@ -7,7 +7,9 @@ use Framework\Database;
 
 class DatabaseCreate implements ShellCommand
 {
-    public static function execute(array $options) : void
+    public const CMD_NAME = 'database:create';
+    
+    public static function execute() : void
     {
         $database = Database::getInstance();
         $database->connectAsAdmin();

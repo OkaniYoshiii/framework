@@ -1,12 +1,14 @@
 <?php 
 
-namespace Framework\Shell\Commands;
+namespace Framework\Commands;
 
 use Framework\Contracts\Interfaces\ShellCommand;
 
 class Init implements ShellCommand
 {
-    public static function execute(array $options): void
+    public const CMD_NAME = 'app:init';
+
+    public static function execute(): void
     {
         self::copyFolderContentToDestination('framework/structure', './');
     }

@@ -11,13 +11,19 @@ use Framework\ShellProgram;
 use Framework\Types\ObjectCollection;
 use Framework\Types\TableProperty;
 
-class MakeEntity implements ShellCommand
+class MakeEntity implements ShellCommand  
 {
+    public const CMD_NAME = 'make:entity';
+
     private static string $entityName;
     private static ObjectCollection $entityProperties;
+    private static Database $database;
 
-    public static function execute(array $options) : void
+    public static function execute() : void
     {
+        self::$database = Database::getInstance();
+        self::$database->connect();
+
         self::$entityProperties = new ObjectCollection(TableProperty::class);
         self::askEntityConfiguration();
 
@@ -30,25 +36,29 @@ class MakeEntity implements ShellCommand
         $isAddingAnotherProperty = self::askAddAnotherEntity();
         ShellProgram::addBreakLine();
         if($isAddingAnotherProperty){
-            call_user_func(__METHOD__, $options);
+            call_user_func(__METHOD__);
         }
+
+        self::$database->disconnect();
     }
 
     private static function createTable() : void
     {
-        $database = Database::getInstance();
-        $database->connect();
-
         $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
         $fields = array_map(fn(TableProperty $property) : string => $property->getDatabaseMapping(), self::$entityProperties->getItems());
 
-        $database->createTable($table, ...$fields);
+        self::$database->createTable($table, ...$fields);
     }
 
     private static function askEntityConfiguration() : void
     {
         self::$entityName = self::askClassName();
         ShellProgram::addBreakLine();
+
+        if(self::$database->tableExists(TableProperty::getMappedName(self::$entityName))) {
+            ShellProgram::displayErrorMessage('L\'entité ' . self::$entityName . ' existe déjà. Si vous souhaitez la modifier, utilisez plutot la commande : ' . ModifyEntity::CMD_NAME);
+            call_user_func(__METHOD__);
+        }
 
         self::addPrimaryKey(self::$entityName);
 

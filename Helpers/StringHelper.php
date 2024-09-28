@@ -8,11 +8,17 @@ class StringHelper
 {
     public static function camelCaseToSnakeCase(string $string) : string
     {
-        $words = preg_split('/(?=[A-Z])/', $string, -1, PREG_SPLIT_NO_EMPTY);
-        $snakeCase = implode('_', $words);
-        $snakeCase = strtolower($snakeCase);
-        
-        return $snakeCase;
+        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
+    }
+
+    public static function snakeCaseToCamelCase(string $string) : string
+    {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
+    }
+
+    public static function toTitleCase(string $string) : string
+    {
+        return str_replace('_', '', mb_convert_case($string, MB_CASE_TITLE));
     }
 
     public static function isSnakeCase(string $string) : bool
