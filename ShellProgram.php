@@ -3,9 +3,13 @@
 namespace Framework;
 
 use Dotenv\Dotenv;
+use Exception;
 use Framework\Commands\DatabaseCreate;
 use Framework\Commands\MakeEntity;
+use Framework\Enums\DataType;
+use Framework\Exceptions\IncorrectObjectCollectionType;
 use Framework\Shell\Commands\Init;
+use Framework\Types\ObjectCollection;
 
 class ShellProgram
 {
@@ -22,20 +26,52 @@ class ShellProgram
         };
     }
 
+    public static function displayErrorMessage(string $message) : void
+    {
+        echo PHP_EOL;
+        echo 'ERREUR : ' . $message;
+        echo PHP_EOL;
+        self::addBreakLine();
+    }
+
+    public static function waitForAnswer() : string
+    {
+        $handle = fopen("php://stdin","r");
+        $answer = fgets($handle);
+        fclose($handle);
+
+        if($answer === false) die('Fermeture du programme');
+        $answer = trim($answer);
+
+        return trim($answer);
+    }
+
     /**
      * Pose une question OUVERTE dans le Shell
      * 
      * @param string $question
      * @return string
      */
-    public static function askOpenEndedQuestion(string $question) : string
+    public static function askOpenEndedQuestion(string $question, bool $asInteger = false) : string|int
     {
         echo $question;
         echo PHP_EOL;
-        $handle = fopen("php://stdin","r");
-        $answer = fgets($handle);
-        fclose($handle);
-        $answer = trim($answer);
+
+        $answer = self::waitForAnswer();
+
+        if(empty($answer)) {
+            self::displayErrorMessage('La question est obligatoire');
+            return call_user_func($question, $asInteger);
+        }
+
+        if($asInteger) {
+            if(!is_numeric($answer)) {
+                self::displayErrorMessage('La valeur doit être de type : ' . DataType::INTEGER->value);
+                return call_user_func(__METHOD__, $question, $asInteger);
+            }
+
+            $answer = intval($answer);
+        } 
 
         return $answer;
     }
@@ -52,10 +88,11 @@ class ShellProgram
      */
     public static function askCloseEndedQuestion(string $question, array $answers) : string
     {
-        $question = $question . ' (' . implode('/', $answers) . ')';
-        $answer = self::askOpenEndedQuestion($question);
+        $formattedQuestion = $question . ' (' . implode('/', $answers) . ')';
+        $answer = self::askOpenEndedQuestion($formattedQuestion);
 
         if(!in_array($answer,$answers) ) {
+            self::displayErrorMessage($answer . ' ne fait pas partie des réponses proposées');
             return call_user_func(__METHOD__, $question, $answers);
         }
 

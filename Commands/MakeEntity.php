@@ -22,29 +22,30 @@ class MakeEntity implements ShellCommand
     public static function execute(array $options) : void
     {
         self::$entityProperties = new ObjectCollection(TableProperty::class);
-        self::createTable();
+        self::askEntityConfiguration();
+        $isValidated = self::askValidate();
+        if($isValidated) {
+            self::createTable();
+        }
     }
 
     private static function createTable() : void
+    {
+        $database = Database::getInstance();
+        $database->connect();
+
+        $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
+        $fields = array_map(fn(TableProperty $property) => $property->getDatabaseMapping(), self::$entityProperties->getItems());
+        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
+    }
+
+    private static function askEntityConfiguration() : void
     {
         self::$entityName = self::askClassName();
         ShellProgram::addBreakLine();
 
         self::askProperties();
         ShellProgram::addBreakLine();
-
-        $isValidated = self::askValidate();
-
-        if($isValidated) {
-            $database = Database::getInstance();
-            $database->connect();
-
-            // $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
-            // $fields = 
-            // $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ',$fields) . ')';
-            // var_dump($sqlQuery);
-            // $database->getPdo()->query($sqlQuery);
-        }
     }
 
     private static function askClassName() : string
@@ -52,9 +53,8 @@ class MakeEntity implements ShellCommand
         $entityName = ShellProgram::askOpenEndedQuestion('Quel nom de classe souhaitez vous donner à votre entité ?');
 
         if(!StringHelper::isTitleCase($entityName)) {
-            echo (new IncorrectStringCaseException($entityName, [StringCase::TITLE_CASE]))->getMessage();
-            echo PHP_EOL;
-            call_user_func(__METHOD__);
+            ShellProgram::displayErrorMessage($entityName . ' n\'est pas formatté en TitleCase');
+            return call_user_func(__METHOD__);
         }
 
         return $entityName;
@@ -62,23 +62,33 @@ class MakeEntity implements ShellCommand
 
     private static function askProperties() : void
     {
-        $property['name'] = self::askPropertyName();
+        $name = self::askPropertyName();
 
         ShellProgram::addBreakLine();
 
-        $property['type'] = self::askPropertyType();
+        $type = self::askPropertyType();
 
         ShellProgram::addBreakLine();
 
-        $property['isNullable'] = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
+        $length = null;
+        if($type->maxLength() !== null && $type->length() === null) {
+            $length = self::askPropertyLength($type);
+            ShellProgram::addBreakLine();
+        } else {
+            $length = $type->length();
+        }
 
-        $property = new TableProperty(...$property);
+        $isNullable = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
+
+        $property = new TableProperty($name, $type, $isNullable);
+        if(isset($length) && $length !== null) $property->setLength($length);
         self::$entityProperties->addItem($property);
 
-        $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
         ShellProgram::addBreakLine();
+        $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
         
         if($isAddingAnotherProperty) {
+            ShellProgram::addBreakLine();
             call_user_func(__METHOD__);
         }
     }
@@ -88,9 +98,9 @@ class MakeEntity implements ShellCommand
         $name = ShellProgram::askOpenEndedQuestion('Ajoutez une propriété à cette classe :');
 
         if(!StringHelper::isCamelCase($name) && !StringHelper::isSnakeCase($name)) {
-            echo (new IncorrectStringCaseException($name, [StringCase::SNAKE_CASE, StringCase::CAMEL_CASE]))->getMessage();
-            echo PHP_EOL;
-            call_user_func(__METHOD__);
+            ShellProgram::displayErrorMessage($name . ' n\'est pas formatté en camelCase ou snake_case');
+            unset($name);
+            return call_user_func(__METHOD__);
         }
 
         return $name;
@@ -101,6 +111,20 @@ class MakeEntity implements ShellCommand
         $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', TablePropertyType::values());
 
         return TablePropertyType::from($type);
+    }
+
+    private static function askPropertyLength(TablePropertyType $type) : int
+    {
+        if($type->maxLength() === null) throw new Exception(__METHOD__ . ' can only be used when $type has a maxLength.');
+
+        $length = ShellProgram::askOpenEndedQuestion('Quelle longueur maximale peut avoir cette propriété dans la base de données ? (longueur maximale : ' . $type->maxLength() . ')', asInteger : true);
+
+        if($length > $type->maxLength()) {
+            ShellProgram::displayErrorMessage($length . ' est supérieur à la longueur maximale de ce type de propriété (' . $type->maxLength() . ')');
+            return call_user_func(__METHOD__, $type);
+        }
+
+        return $length;
     }
 
     private static function askValidate() : bool

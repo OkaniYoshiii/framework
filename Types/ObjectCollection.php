@@ -6,16 +6,33 @@ use Exception;
 
 class ObjectCollection
 {
-    public function __construct(private readonly string $fqcn, private array $items = [])
+    private readonly string $fqcn;
+    private array $items = [];
+    private bool $isVerified = false;
+    public function __construct(string $fqcn, array $items = [])
     {
+        $this->fqcn = $fqcn;
+        $this->items = $items;
+
         if(!class_exists($fqcn)) throw new Exception('Class ' . $fqcn . ' does not exists');
-        if(!$this->isContainingOnlyInstanceOf($fqcn, $items)) throw new Exception('Array "[' . implode(', ', $items) . ']" does not contains only instances of ' . $fqcn);
+        if(!$this->hasOnlyInstanceOf($fqcn)) throw new Exception('Argument $items does not contains only instances of ' . $fqcn);
     }
 
-    private function isContainingOnlyInstanceOf(string $fqcn, array $items) : bool
+    public function hasOnlyInstanceOf(string $fqcn) : bool
     {
-        $matchedTypes = array_filter($items, fn(mixed $item) => $item instanceof $fqcn);
-        return count($matchedTypes) === count($items);
+        if($this->isVerified) return $fqcn !== $this->fqcn;
+
+        $hasOnlyInstancesOfFqcn = array_every($this->items, fn($item) => $item instanceof $fqcn);
+
+        $this->isVerified = true;
+
+        return $hasOnlyInstancesOfFqcn;
+
+        // $matchedTypes = array_filter($this->items, fn(mixed $item) => $item instanceof $fqcn);
+
+        // $this->isVerified = true;
+
+        // return count($matchedTypes) === count($this->items);
     }
 
     public function addItem(object $object) : void
@@ -28,5 +45,13 @@ class ObjectCollection
     public function getItems() : array
     {
         return $this->items;
+    }
+
+    /**
+     * Renvoie le FQCN (Fully Qualified Class Name) des items dans la Collection
+     */
+    public function getItemsFqcn() : string
+    {
+        return $this->fqcn;
     }
 }

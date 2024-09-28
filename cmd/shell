@@ -2,6 +2,7 @@
 
 use Framework\ShellProgram;
 
+require_once './framework/functions.php';
 require_once './vendor/autoload.php';
 
 ShellProgram::start($argv);
