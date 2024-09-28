@@ -9,7 +9,7 @@ use Framework\ShellProgram;
 
 class ModifyEntity implements ShellCommand
 {
-    const CMD_NAME = 'modify:entity';
+    const CMD_NAME = 'entity:modify';
 
     private static Database $database;
     private static string $entityName;

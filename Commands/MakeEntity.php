@@ -13,7 +13,7 @@ use Framework\Types\TableProperty;
 
 class MakeEntity implements ShellCommand  
 {
-    public const CMD_NAME = 'make:entity';
+    public const CMD_NAME = 'entity:make';
 
     private static string $entityName;
     private static ObjectCollection $entityProperties;
