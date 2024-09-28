@@ -14,6 +14,8 @@ class TableProperty
     private readonly TablePropertyType $type;
     private ?int $length = null;
     private readonly bool $isNullable;
+    private bool $isPrimaryKey = false;
+    private bool $isUnsigned = false;
     public function __construct(string $name, TablePropertyType $type, bool $isNullable)
     {
         $this->name = $name;
@@ -36,6 +38,20 @@ class TableProperty
         return $this;
     }
 
+    public function setIsPrimaryKey(bool $isPrimaryKey) : self
+    {
+        $this->isPrimaryKey = $isPrimaryKey;
+
+        return $this;
+    }
+
+    public function setIsUnsigned(bool $isUnsigned) : self
+    {
+        $this->isUnsigned = $isUnsigned;
+
+        return $this;
+    }
+
     public function getName() : string
     {
         return $this->name;
@@ -54,14 +70,12 @@ class TableProperty
     public function getDatabaseMapping() : string
     {
         $name = StringHelper::camelCaseToSnakeCase($this->getName());
-        $type = $this->getType()->mapping();
-        $length = $this->length;
+        $type =  $this->getType()->mapping();
+        $length = ($this->length !== null) ? '(' . $this->length . ')' : '';
         $isNullable = ($this->getIsNullable()) ? 'NULL' : 'NOT NULL';
+        $isPrimaryKey = ($this->isPrimaryKey) ? 'PRIMARY KEY AUTO_INCREMENT' : '';
+        $isUnsigned = ($this->isUnsigned) ? 'UNSIGNED' : '';
 
-        if($length === null) {
-            return sprintf('%s %s %s', $name, $type, $isNullable);
-        } 
-
-        return sprintf('%s %s(%s) %s', $name, $type, $length, $isNullable);
+        return implode(' ', [$name, $type, $length, $isUnsigned, $isNullable, $isPrimaryKey]);
     }
 }

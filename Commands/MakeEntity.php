@@ -45,14 +45,17 @@ class MakeEntity implements ShellCommand
         $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
         $fields = array_map(fn(TableProperty $property) => $property->getDatabaseMapping(), self::$entityProperties->getItems());
         $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
-        $pdo = $database->getPdo();
-        $pdo->query($sqlQuery);
+        echo $sqlQuery;
+        // $pdo = $database->getPdo();
+        // $pdo->query($sqlQuery);
     }
 
     private static function askEntityConfiguration() : void
     {
         self::$entityName = self::askClassName();
         ShellProgram::addBreakLine();
+
+        self::addPrimaryKey(self::$entityName);
 
         self::askProperties();
         ShellProgram::addBreakLine();
@@ -101,6 +104,19 @@ class MakeEntity implements ShellCommand
             ShellProgram::addBreakLine();
             call_user_func(__METHOD__);
         }
+    }
+
+    private static function addPrimaryKey(string $name) : void
+    {
+        $name = StringHelper::camelCaseToSnakeCase($name) . '_id';
+        $property = new TableProperty($name, TablePropertyType::INTEGER, false);
+        $property->setLength(11);
+        $property->setIsPrimaryKey(true);
+        $property->setIsUnsigned(true);
+
+        echo $property;
+
+        self::$entityProperties->addItem($property);
     }
 
     private static function askPropertyName() : string
