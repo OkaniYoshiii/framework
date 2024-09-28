@@ -15,6 +15,7 @@ class MakeEntity implements ShellCommand
 {
     public const CMD_NAME = 'entity:make';
 
+    private static string $primaryKey;
     private static string $entityName;
     private static ObjectCollection $entityProperties;
     private static Database $database;
@@ -54,6 +55,7 @@ class MakeEntity implements ShellCommand
                 'isNullable' => $property->getIsNullable(),
             ];
         }, self::$entityProperties->getItems());
+        $entity['primaryKey'] = self::$primaryKey;
 
         $cacheDir = './framework/cache/';
         if(is_dir($cacheDir)) {
@@ -135,8 +137,8 @@ class MakeEntity implements ShellCommand
 
     private static function addPrimaryKey(string $name) : void
     {
-        $name = StringHelper::camelCaseToSnakeCase($name) . '_id';
-        $property = new TableProperty($name, TablePropertyType::INTEGER, false);
+        self::$primaryKey = StringHelper::camelCaseToSnakeCase($name) . '_id';
+        $property = new TableProperty(self::$primaryKey, TablePropertyType::INTEGER, false);
         $property->setLength(11);
         $property->setIsPrimaryKey(true);
         $property->setIsUnsigned(true);

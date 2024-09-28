@@ -1,0 +1,1 @@
+{"name":"Patate","table":"patate","properties":[{"name":"patate_id","field":"patate_id","type":"integer","isNullable":false},{"name":"name","field":"name","type":"string","isNullable":false}],"primaryKey":"patate_id"}
