@@ -31,8 +31,18 @@ class Database
     public function createTable(string $table, string ...$fields) : void
     {
         $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
-        $pdo = $this->getPdo();
-        $pdo->query($sqlQuery);
+        $this->pdo->query($sqlQuery);
+    }
+
+    public function tableExists(string $table) : bool
+    {
+        $sqlQuery = 'SHOW TABLES LIKE :table';
+        $this->stmt = $this->pdo->prepare($sqlQuery);
+        $this->stmt->bindValue(':table', $table, PDO::PARAM_STR);
+        $this->stmt->execute();
+        $result = $this->stmt->fetch();
+
+        return ($result !== false);
     }
 
     public function disconnect()
