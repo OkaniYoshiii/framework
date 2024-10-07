@@ -1,6 +1,7 @@
 {
     "name": "okaniyoshiii/framework",
     "type": "personnal-project",
+    "description" : "A personnal PHP framework for my own workflow",
     "autoload": {
         "psr-4": {
             "OkaniYoshiii\\Framework\\": "src/"
@@ -11,5 +12,7 @@
             "name": "OkaniYoshiii"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.2"
+    }
 }
