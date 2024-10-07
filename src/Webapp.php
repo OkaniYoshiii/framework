@@ -8,7 +8,7 @@ use OkaniYoshiii\Framework\Session;
 
 class Webapp
 {
-    public function init()
+    public static function init()
     {
         $loader = new \Twig\Loader\FilesystemLoader('../templates');
         $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
