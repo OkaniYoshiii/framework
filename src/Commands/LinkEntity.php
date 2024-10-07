@@ -2,6 +2,7 @@
 
 namespace OkaniYoshiii\Framework\Commands;
 
+use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
 use OkaniYoshiii\Framework\Database;
 use OkaniYoshiii\Framework\Enums\TableRelation;
@@ -19,7 +20,7 @@ class LinkEntity implements ShellCommand
     private static TableRelation $relation;
 
     public static function execute() : void
-    {
+    {     
         self::$database = Database::getInstance();
         self::$database->connect();
 

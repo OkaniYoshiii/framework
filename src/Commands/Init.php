@@ -2,6 +2,7 @@
 
 namespace OkaniYoshiii\Framework\Commands;
 
+use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
 
 class Init implements ShellCommand
@@ -10,13 +11,11 @@ class Init implements ShellCommand
 
     public static function execute(): void
     {
-        self::copyFolderContentToDestination('framework/structure', './');
+        self::copyFolderContentToDestination(App::FRAMEWORK_DIR . 'structure/', './');
     }
 
-    public static function copyFolderContentToDestination($sourceDirectory, $destinationDirectory) : void
+    public static function copyFolderContentToDestination($source, $destination) : void
     {
-        copyDirectory($sourceDirectory, $destinationDirectory);
-
         function copyDirectory($source, $destination) {
             if (!is_dir($destination)) {
                 mkdir($destination, 0755, true);
@@ -35,5 +34,7 @@ class Init implements ShellCommand
                 }
             }
         }
+
+        copyDirectory($source, $destination);
     }
 }

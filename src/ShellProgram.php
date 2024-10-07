@@ -14,9 +14,6 @@ class ShellProgram
 {
     public static function start(array $argv)
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env.local');
-        $dotenv->load();
-
         match($argv[1]) {
             DatabaseCreate::CMD_NAME => DatabaseCreate::execute(),
             Init::CMD_NAME => Init::execute(),

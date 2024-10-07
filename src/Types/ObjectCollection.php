@@ -4,6 +4,8 @@ namespace OkaniYoshiii\Framework\Types;
 
 use Exception;
 
+use function OkaniYoshiii\Framework\array_every;
+
 class ObjectCollection
 {
     private readonly string $fqcn;

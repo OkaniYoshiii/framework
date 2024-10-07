@@ -14,6 +14,11 @@ class Database
     private ?PDO $pdo = null;
     private ?PDOStatement $stmt = null;
 
+    private function __construct()
+    {
+        App::loadEnvVariables();
+    }
+
     public function connectAsAdmin() : void
     {
         $this->pdo = new PDO('mysql:host=' . $_ENV['DATABASE_HOST'], $_ENV['DATABASE_USER'], $_ENV['DATABASE_PASSWORD']);
