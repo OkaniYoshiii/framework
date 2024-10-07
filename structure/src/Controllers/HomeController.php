@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Framework\Contracts\Traits\SingletonTrait;
-use Framework\Types\Request;
+use OkaniYoshiii\Framework\Contracts\Traits\SingletonTrait;
+use OkaniYoshiii\Framework\Types\Request;
 
 class HomeController
 {

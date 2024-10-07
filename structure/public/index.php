@@ -1,6 +1,6 @@
 <?php
 
-use Framework\Webapp;
+use OkaniYoshiii\Framework\Webapp;
 
 require_once '../vendor/autoload.php';
 

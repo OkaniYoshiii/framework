@@ -1,8 +1,8 @@
 <?php
 
-use Framework\ShellProgram;
+use OkaniYoshiii\Framework\ShellProgram;
 
-require_once './framework/functions.php';
-require_once './vendor/autoload.php';
+require_once './framework/src/functions.php';
+require_once './framework/vendor/autoload.php';
 
 ShellProgram::start($argv);
