@@ -20,7 +20,7 @@ class ShellProgram
             MakeEntity::CMD_NAME => MakeEntity::execute(),
             ModifyEntity::CMD_NAME => ModifyEntity::execute(),
             LinkEntity::CMD_NAME => LinkEntity::execute(),
-            default => null,
+            default => self::displayErrorMessage('La commande spécifiée n\'existe pas'),
         };
     }
 

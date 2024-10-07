@@ -3,21 +3,27 @@
 namespace OkaniYoshiii\Framework\Commands;
 
 use Exception;
+use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
 use OkaniYoshiii\Framework\Database;
-use OkaniYoshiii\Framework\Enums\TablePropertyType;
+use OkaniYoshiii\Framework\Enums\SQLFieldType;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
 use OkaniYoshiii\Framework\ShellProgram;
 use OkaniYoshiii\Framework\Types\EntityDto;
 use OkaniYoshiii\Framework\Types\ObjectCollection;
-use OkaniYoshiii\Framework\Types\TableProperty;
+use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
+use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
+use OkaniYoshiii\Framework\Types\Primitive\TitleCaseWord;
+use OkaniYoshiii\Framework\Types\Primitive\Word;
+use OkaniYoshiii\Framework\Types\SQLField;
+use OkaniYoshiii\Framework\Types\SQLTable;
 
 class MakeEntity implements ShellCommand  
 {
     public const CMD_NAME = 'entity:make';
 
-    private static string $primaryKey;
-    private static string $entityName;
+    private static Word $primaryKey;
+    private static PascalCaseWord $entityName;
     private static ObjectCollection $entityProperties;
     private static Database $database;
 
@@ -26,7 +32,7 @@ class MakeEntity implements ShellCommand
         self::$database = Database::getInstance();
         self::$database->connect();
 
-        self::$entityProperties = new ObjectCollection(TableProperty::class);
+        self::$entityProperties = new ObjectCollection(SQLField::class);
         self::askEntityConfiguration();
 
         $isValidated = self::askValidate();
@@ -47,22 +53,18 @@ class MakeEntity implements ShellCommand
 
     private static function saveEntityAsJSON() : void
     {
-        $properties = array_map(fn(TableProperty $property) => $property->toArray(), self::$entityProperties->getItems());
-        $entity = new EntityDto(self::$entityName, self::$primaryKey, ...$properties);
+        $properties = array_map(fn(SQLField $property) => $property->toArray(), self::$entityProperties->getItems());
+        $sqlTable = new SQLTable(self::$entityName, self::$primaryKey, ...$properties);
 
-        $cacheDir = './framework/cache/';
-        if(is_dir($cacheDir)) {
-            file_put_contents('./framework/cache/' . $entity->getName() . '.json', json_encode($entity->toArray()));
-        } else {
-            mkdir('./framework/cache/');
-            file_put_contents('./framework/cache/' . $entity->getName() . '.json', json_encode($entity->toArray()));
-        }
+        if(!is_dir(App::CACHE_DIR)) mkdir(App::CACHE_DIR);
+
+        file_put_contents(App::CACHE_DIR . $sqlTable->getName() . '.json', json_encode($sqlTable->toArray()));
     }
 
     private static function createTable() : void
     {
         $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
-        $fields = array_map(fn(TableProperty $property) : string => $property->getDatabaseMapping(), self::$entityProperties->getItems());
+        $fields = array_map(fn(SQLField $property) : string => $property->getDatabaseMapping(), self::$entityProperties->getItems());
 
         self::$database->createTable($table, ...$fields);
     }
@@ -72,7 +74,8 @@ class MakeEntity implements ShellCommand
         self::$entityName = self::askClassName();
         ShellProgram::addBreakLine();
 
-        if(self::$database->tableExists(TableProperty::getMappedName(self::$entityName))) {
+        $tableName = StringHelper::pascalCaseToSnakeCase(self::$entityName);
+        if(self::$database->tableExists($tableName)) {
             ShellProgram::displayErrorMessage('L\'entité ' . self::$entityName . ' existe déjà. Si vous souhaitez la modifier, utilisez plutot la commande : ' . ModifyEntity::CMD_NAME);
             call_user_func(__METHOD__);
         }
@@ -83,16 +86,16 @@ class MakeEntity implements ShellCommand
         ShellProgram::addBreakLine();
     }
 
-    private static function askClassName() : string
+    private static function askClassName() : PascalCaseWord
     {
         $entityName = ShellProgram::askOpenEndedQuestion('Quel nom de classe souhaitez vous donner à votre entité ?');
 
-        if(!StringHelper::isTitleCase($entityName)) {
-            ShellProgram::displayErrorMessage($entityName . ' n\'est pas formatté en TitleCase');
+        if(!StringHelper::isPascalCase($entityName)) {
+            ShellProgram::displayErrorMessage($entityName . ' n\'est pas formaté en PascalCase');
             return call_user_func(__METHOD__);
         }
 
-        return $entityName;
+        return new PascalCaseWord($entityName);
     }
 
     private static function askProperties() : void
@@ -115,7 +118,7 @@ class MakeEntity implements ShellCommand
 
         $isNullable = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
 
-        $property = new TableProperty($name, $type, $isNullable);
+        $property = new SQLField($name, $type, $isNullable);
         if(isset($length) && $length !== null) $property->setLength($length);
         self::$entityProperties->addItem($property);
 
@@ -128,10 +131,10 @@ class MakeEntity implements ShellCommand
         }
     }
 
-    private static function addPrimaryKey(string $name) : void
+    private static function addPrimaryKey(SnakeCaseWord $name) : void
     {
-        self::$primaryKey = StringHelper::camelCaseToSnakeCase($name) . '_id';
-        $property = new TableProperty(self::$primaryKey, TablePropertyType::INTEGER, false);
+        self::$primaryKey = $name . '_id';
+        $property = new SQLField(self::$primaryKey, SQLFieldType::INTEGER, false);
         $property->setLength(11);
         $property->setIsPrimaryKey(true);
         $property->setIsUnsigned(true);
@@ -152,14 +155,14 @@ class MakeEntity implements ShellCommand
         return $name;
     }
 
-    private static function askPropertyType() : TablePropertyType
+    private static function askPropertyType() : SQLFieldType
     {
-        $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', TablePropertyType::values());
+        $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', SQLFieldType::values());
 
-        return TablePropertyType::from($type);
+        return SQLFieldType::from($type);
     }
 
-    private static function askPropertyLength(TablePropertyType $type) : int
+    private static function askPropertyLength(SQLFieldType $type) : int
     {
         if($type->maxLength() === null) throw new Exception(__METHOD__ . ' can only be used when $type has a maxLength.');
 

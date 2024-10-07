@@ -4,7 +4,7 @@ namespace OkaniYoshiii\Framework\Enums;
 
 use OkaniYoshiii\Framework\Contracts\Traits\EnumTrait;
 
-enum TablePropertyType : string
+enum SQLFieldType : string
 {
     use EnumTrait;
     

@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace OkaniYoshiii\Framework\Types;
 
 use Exception;
-use OkaniYoshiii\Framework\Enums\TablePropertyType;
+use OkaniYoshiii\Framework\Enums\SQLFieldType;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
+use OkaniYoshiii\Framework\Types\Primitive\Word;
 
-class TableProperty
+class SQLField
 {
-    private readonly string $name;
-    private readonly TablePropertyType $type;
+    private readonly Word $name;
+    private readonly SQLFieldType $type;
     private ?int $length = null;
     private readonly bool $isNullable;
     private bool $isPrimaryKey = false;
     private bool $isUnsigned = false;
 
-    public function __construct(string $name, TablePropertyType $type, bool $isNullable)
+    public function __construct(Word $name, SQLFieldType $type, bool $isNullable)
     {
         $this->name = $name;
         $this->type = $type;
@@ -53,12 +54,12 @@ class TableProperty
         return $this;
     }
 
-    public function getName() : string
+    public function getName() : Word
     {
         return $this->name;
     }
 
-    public function getType() : TablePropertyType
+    public function getType() : SQLFieldType
     {
         return $this->type;
     }
@@ -83,9 +84,9 @@ class TableProperty
     /**
      * Retourne une chaine de caractères formattée comme une table de la base de données
      */
-    public static function getMappedName(string $name) : string
+    public static function getMappedName(Word $name) : string
     {
-        return StringHelper::camelCaseToSnakeCase($name);
+        return StringHelper::camelCaseToSnakeCase($name->getValue());
     }
 
     public function toArray() : array

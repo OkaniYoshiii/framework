@@ -4,6 +4,8 @@ namespace OkaniYoshiii\Framework;
 
 use OkaniYoshiii\Framework\Contracts\Traits\SingletonTrait;
 use OkaniYoshiii\Framework\Types\EntityDto;
+use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
+use OkaniYoshiii\Framework\Types\Primitive\Word;
 use PDO;
 use PDOStatement;
 
@@ -14,37 +16,47 @@ class Database
     private ?PDO $pdo = null;
     private ?PDOStatement $stmt = null;
 
+    private readonly Word $name;
+    private readonly Word $host;
+    private readonly Word $user;
+    private readonly string $password;
+
     private function __construct()
     {
         App::loadEnvVariables();
+
+        $this->name = new Word($_ENV['DATABASE_NAME']);
+        $this->host = new Word($_ENV['DATABASE_HOST']);
+        $this->user = new Word($_ENV['DATABASE_USER']);
+        $this->password = $_ENV['DATABASE_PASSWORD'];
     }
 
     public function connectAsAdmin() : void
     {
-        $this->pdo = new PDO('mysql:host=' . $_ENV['DATABASE_HOST'], $_ENV['DATABASE_USER'], $_ENV['DATABASE_PASSWORD']);
+        $this->pdo = new PDO('mysql:host=' . $this->host, $this->user, $this->password);
     }
 
     public function connect()
     {
-        $this->pdo = new PDO('mysql:host=' . $_ENV['DATABASE_HOST'] . ';dbname=' . $_ENV['DATABASE_NAME'], $_ENV['DATABASE_USER'], $_ENV['DATABASE_PASSWORD']);
+        $this->pdo = new PDO('mysql:host=' . $this->host . ';dbname=' . $this->name, $this->user, $this->password);
     }
 
     public function create() 
     {
-        $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $_ENV['DATABASE_NAME']);
+        $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $this->name);
     }
 
-    public function createTable(string $table, string ...$fields) : void
+    public function createTable(SnakeCaseWord $table, SnakeCaseWord ...$fields) : void
     {
         $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
         $this->pdo->query($sqlQuery);
     }
 
-    public function tableExists(string $table) : bool
+    public function tableExists(SnakeCaseWord $table) : bool
     {
         $sqlQuery = 'SHOW TABLES LIKE :table';
         $this->stmt = $this->pdo->prepare($sqlQuery);
-        $this->stmt->bindValue(':table', $table, PDO::PARAM_STR);
+        $this->stmt->bindValue(':table', $table->getValue(), PDO::PARAM_STR);
         $this->stmt->execute();
         $result = $this->stmt->fetch();
 
@@ -72,25 +84,5 @@ class Database
     {
         $this->pdo = null;
         $this->stmt = null;
-    }
-
-    /**
-     * Get the value of pdo
-     */ 
-    public function getPdo()
-    {
-        return $this->pdo;
-    }
-
-    /**
-     * Set the value of stmt
-     *
-     * @return  self
-     */ 
-    public function setStmt($stmt)
-    {
-        $this->stmt = $stmt;
-
-        return $this;
     }
 }
