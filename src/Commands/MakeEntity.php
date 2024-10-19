@@ -3,19 +3,15 @@
 namespace OkaniYoshiii\Framework\Commands;
 
 use Exception;
-use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 use OkaniYoshiii\Framework\Database;
 use OkaniYoshiii\Framework\Enums\SQLFieldType;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
 use OkaniYoshiii\Framework\ShellProgram;
 use OkaniYoshiii\Framework\Types\Entity;
-use OkaniYoshiii\Framework\Types\EntityDto;
-use OkaniYoshiii\Framework\Types\ObjectCollection;
 use OkaniYoshiii\Framework\Types\Primitive\CamelCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
-use OkaniYoshiii\Framework\Types\Primitive\Word;
 use OkaniYoshiii\Framework\Types\SQLField;
 use OkaniYoshiii\Framework\Types\SQLTable;
 use OkaniYoshiii\Framework\Types\Test;
@@ -44,7 +40,6 @@ class MakeEntity extends ShellCommand
         $database = Database::getInstance();
         $database->connect();
 
-        // $entityProperties = new ObjectCollection(SQLField::class);
         $entity = self::askEntityConfiguration();
 
         $isValidated = self::askValidationForCreatedEntity($entity);
@@ -75,14 +70,6 @@ class MakeEntity extends ShellCommand
     {
         $name = self::askEntityName();
         ShellProgram::addBreakLine();
-
-        // $tableName = StringHelper::pascalCaseToSnakeCase($entityName);
-        // if($database->tableExists($tableName)) {
-        //     ShellProgram::displayErrorMessage('L\'entité ' . $entityName . ' existe déjà. Si vous souhaitez la modifier, utilisez plutot la commande : ' . ModifyEntity::CMD_NAME);
-        //     call_user_func(__METHOD__);
-        // }
-
-        // $primaryKey = self::addPrimaryKey($entityName);
 
         $properties = [];
         do {
@@ -190,16 +177,6 @@ class MakeEntity extends ShellCommand
 
         return $length;
     }
-
-    // private static function saveEntityAsJSON() : void
-    // {
-    //     $properties = array_map(fn(SQLField $property) => $property->toArray(), $entityProperties->getItems());
-    //     $sqlTable = new SQLTable($entityName, self::$primaryKey, ...$properties);
-
-    //     if(!is_dir(App::CACHE_DIR)) mkdir(App::CACHE_DIR);
-
-    //     file_put_contents(App::CACHE_DIR . $sqlTable->getName() . '.json', json_encode($sqlTable->toArray()));
-    // }
 
     private static function buildEntityRepresentation(Entity $entity) : string
     {
