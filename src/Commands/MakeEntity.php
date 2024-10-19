@@ -4,91 +4,112 @@ namespace OkaniYoshiii\Framework\Commands;
 
 use Exception;
 use OkaniYoshiii\Framework\App;
-use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
+use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 use OkaniYoshiii\Framework\Database;
 use OkaniYoshiii\Framework\Enums\SQLFieldType;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
 use OkaniYoshiii\Framework\ShellProgram;
+use OkaniYoshiii\Framework\Types\Entity;
 use OkaniYoshiii\Framework\Types\EntityDto;
 use OkaniYoshiii\Framework\Types\ObjectCollection;
+use OkaniYoshiii\Framework\Types\Primitive\CamelCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
-use OkaniYoshiii\Framework\Types\Primitive\TitleCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\Word;
 use OkaniYoshiii\Framework\Types\SQLField;
 use OkaniYoshiii\Framework\Types\SQLTable;
+use OkaniYoshiii\Framework\Types\Test;
 
-class MakeEntity implements ShellCommand  
+class MakeEntity extends ShellCommand
 {
     public const CMD_NAME = 'entity:make';
 
     private static Word $primaryKey;
-    private static PascalCaseWord $entityName;
-    private static ObjectCollection $entityProperties;
-    private static Database $database;
 
-    public static function execute() : void
+    protected static function configureRequirements(): array
     {
-        self::$database = Database::getInstance();
-        self::$database->connect();
+        $message = 'Cannot connect to database';
+        $test = function() {
+            $database = Database::getInstance();
+            $database->connect();
+        };
 
-        self::$entityProperties = new ObjectCollection(SQLField::class);
-        self::askEntityConfiguration();
+        $canConnectToDatabase = new Test($message, $test);
 
-        $isValidated = self::askValidate();
+        return [
+           $canConnectToDatabase,
+        ];
+    }
+
+    protected static function execute() : void
+    {
+        $database = Database::getInstance();
+        $database->connect();
+
+        // $entityProperties = new ObjectCollection(SQLField::class);
+        $entity = self::askEntityConfiguration();
+
+        $isValidated = self::askValidationForCreatedEntity($entity);
+
         ShellProgram::addBreakLine();
         if($isValidated) {
-            self::saveEntityAsJSON();
-            self::createTable();
+            $name = StringHelper::pascalCaseToSnakeCase($entity->getName());
+            $primaryKey = new SnakeCaseWord($name->getValue() . '_id');
+            $properties = $entity->getProperties();
+
+            $table = new SQLTable($name, $primaryKey, ...$properties);
+            // self::saveEntityAsJSON();
+            $database->createTable($table);
         }
 
-        $isAddingAnotherProperty = self::askAddAnotherEntity();
+        $isAddingAnotherEntity = self::askAddAnotherEntity();
+
         ShellProgram::addBreakLine();
-        if($isAddingAnotherProperty){
+        
+        if($isAddingAnotherEntity){
             call_user_func(__METHOD__);
         }
 
-        self::$database->disconnect();
+        $database->disconnect();
     }
 
-    private static function saveEntityAsJSON() : void
+    private static function askEntityConfiguration() : Entity
     {
-        $properties = array_map(fn(SQLField $property) => $property->toArray(), self::$entityProperties->getItems());
-        $sqlTable = new SQLTable(self::$entityName, self::$primaryKey, ...$properties);
-
-        if(!is_dir(App::CACHE_DIR)) mkdir(App::CACHE_DIR);
-
-        file_put_contents(App::CACHE_DIR . $sqlTable->getName() . '.json', json_encode($sqlTable->toArray()));
-    }
-
-    private static function createTable() : void
-    {
-        $table = StringHelper::camelCaseToSnakeCase(self::$entityName);
-        $fields = array_map(fn(SQLField $property) : string => $property->getDatabaseMapping(), self::$entityProperties->getItems());
-
-        self::$database->createTable($table, ...$fields);
-    }
-
-    private static function askEntityConfiguration() : void
-    {
-        self::$entityName = self::askClassName();
+        $name = self::askEntityName();
         ShellProgram::addBreakLine();
 
-        $tableName = StringHelper::pascalCaseToSnakeCase(self::$entityName);
-        if(self::$database->tableExists($tableName)) {
-            ShellProgram::displayErrorMessage('L\'entité ' . self::$entityName . ' existe déjà. Si vous souhaitez la modifier, utilisez plutot la commande : ' . ModifyEntity::CMD_NAME);
-            call_user_func(__METHOD__);
-        }
+        // $tableName = StringHelper::pascalCaseToSnakeCase($entityName);
+        // if($database->tableExists($tableName)) {
+        //     ShellProgram::displayErrorMessage('L\'entité ' . $entityName . ' existe déjà. Si vous souhaitez la modifier, utilisez plutot la commande : ' . ModifyEntity::CMD_NAME);
+        //     call_user_func(__METHOD__);
+        // }
 
-        self::addPrimaryKey(self::$entityName);
+        // $primaryKey = self::addPrimaryKey($entityName);
 
-        self::askProperties();
-        ShellProgram::addBreakLine();
+        $properties = [];
+        do {
+            $property = self::askProperty();
+
+            ShellProgram::addBreakLine();
+
+            $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
+            
+            if($isAddingAnotherProperty === true) ShellProgram::addBreakLine();
+
+            $properties[] = $property;
+        } while($isAddingAnotherProperty === true);
+
+        return new Entity($name, ...$properties);
     }
 
-    private static function askClassName() : PascalCaseWord
+    private static function askEntityName() : PascalCaseWord
     {
         $entityName = ShellProgram::askOpenEndedQuestion('Quel nom de classe souhaitez vous donner à votre entité ?');
+
+        if(!StringHelper::isWord($entityName)) {
+            ShellProgram::displayErrorMessage($entityName . ' doit être un mot composé uniquement de lettres');
+            return call_user_func(__METHOD__);
+        }
 
         if(!StringHelper::isPascalCase($entityName)) {
             ShellProgram::displayErrorMessage($entityName . ' n\'est pas formaté en PascalCase');
@@ -98,7 +119,7 @@ class MakeEntity implements ShellCommand
         return new PascalCaseWord($entityName);
     }
 
-    private static function askProperties() : void
+    private static function askProperty() : SQLField
     {
         $name = self::askPropertyName();
 
@@ -120,39 +141,34 @@ class MakeEntity implements ShellCommand
 
         $property = new SQLField($name, $type, $isNullable);
         if(isset($length) && $length !== null) $property->setLength($length);
-        self::$entityProperties->addItem($property);
 
-        ShellProgram::addBreakLine();
-        $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
-        
-        if($isAddingAnotherProperty) {
-            ShellProgram::addBreakLine();
-            call_user_func(__METHOD__);
-        }
+        return $property;
     }
 
-    private static function addPrimaryKey(SnakeCaseWord $name) : void
+    private static function askValidationForCreatedEntity(Entity $entity) : bool
     {
-        self::$primaryKey = $name . '_id';
-        $property = new SQLField(self::$primaryKey, SQLFieldType::INTEGER, false);
-        $property->setLength(11);
-        $property->setIsPrimaryKey(true);
-        $property->setIsUnsigned(true);
-
-        self::$entityProperties->addItem($property);
+        $entityStringRepresentation = self::buildEntityRepresentation($entity);
+        
+        return ShellProgram::askBooleanQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . PHP_EOL . $entityStringRepresentation . PHP_EOL . 'Êtes vous sur de vos choix ?');
     }
 
-    private static function askPropertyName() : string
+    private static function askPropertyName() : CamelCaseWord
     {
         $name = ShellProgram::askOpenEndedQuestion('Ajoutez une propriété à cette classe :');
 
-        if(!StringHelper::isCamelCase($name) && !StringHelper::isSnakeCase($name)) {
-            ShellProgram::displayErrorMessage($name . ' n\'est pas formatté en camelCase ou snake_case');
+        if(!StringHelper::isWord($name)) {
+            ShellProgram::displayErrorMessage($name . ' doit être un mot simple composé uniquement de lettres, sans espaces ni caractères spéciaux');
             unset($name);
             return call_user_func(__METHOD__);
         }
 
-        return $name;
+        if(!StringHelper::isCamelCase($name)) {
+            ShellProgram::displayErrorMessage($name . ' doit être formatté en camelCase');
+            unset($name);
+            return call_user_func(__METHOD__);
+        }
+
+        return new CamelCaseWord($name);
     }
 
     private static function askPropertyType() : SQLFieldType
@@ -176,20 +192,24 @@ class MakeEntity implements ShellCommand
         return $length;
     }
 
-    private static function askValidate() : bool
-    {
-        return ShellProgram::askBooleanQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . PHP_EOL . self::buildEntityRepresentation() . PHP_EOL . 'Êtes vous sur de vos choix ?');
-    }
+    // private static function saveEntityAsJSON() : void
+    // {
+    //     $properties = array_map(fn(SQLField $property) => $property->toArray(), $entityProperties->getItems());
+    //     $sqlTable = new SQLTable($entityName, self::$primaryKey, ...$properties);
 
-    private static function buildEntityRepresentation() : string
+    //     if(!is_dir(App::CACHE_DIR)) mkdir(App::CACHE_DIR);
+
+    //     file_put_contents(App::CACHE_DIR . $sqlTable->getName() . '.json', json_encode($sqlTable->toArray()));
+    // }
+
+    private static function buildEntityRepresentation(Entity $entity) : string
     {
-        $entityName = self::$entityName;
-        $entityProperties = implode(PHP_EOL . "\t- ", self::$entityProperties->getItems());
+        $properties = implode(PHP_EOL . "\t- ", $entity->getProperties());
 
         return <<<ENTITY
-        Entité : $entityName;
+        Entité : {$entity->getName()};
         Propriétés :
-        \t- $entityProperties
+        \t- $properties
         ENTITY;
     }
 

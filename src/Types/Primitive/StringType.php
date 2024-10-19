@@ -1,6 +1,6 @@
 <?php
 
-namespace OkaniYoshiii\Framework;
+namespace OkaniYoshiii\Framework\Types\Primitive;
 
 abstract class StringType
 {
@@ -18,7 +18,7 @@ abstract class StringType
         return $this->value;
     }
 
-    abstract protected function validate() : void;
+    abstract protected function validate(string $value) : void;
 
     public function getValue() : string
     {

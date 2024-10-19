@@ -2,14 +2,20 @@
 
 namespace OkaniYoshiii\Framework\Commands;
 
-use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
+use Exception;
+use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 use OkaniYoshiii\Framework\Database;
 
-class DatabaseCreate implements ShellCommand
+class DatabaseCreate extends ShellCommand
 {
     public const CMD_NAME = 'database:create';
+
+    protected static function configureRequirements() : array
+    {
+        return [];
+    }
     
-    public static function execute() : void
+    protected static function execute() : void
     {        
         $database = Database::getInstance();
         $database->connectAsAdmin();

@@ -3,11 +3,16 @@
 namespace OkaniYoshiii\Framework\Commands;
 
 use OkaniYoshiii\Framework\App;
-use OkaniYoshiii\Framework\Contracts\Interfaces\ShellCommand;
+use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 
-class Init implements ShellCommand
+class Init extends ShellCommand
 {
     public const CMD_NAME = 'app:init';
+
+    protected static function configureRequirements(): array
+    {
+        return [];
+    }
 
     public static function execute(): void
     {

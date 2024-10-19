@@ -2,34 +2,35 @@
 
 namespace OkaniYoshiii\Framework\Types;
 
+use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\Word;
 
 class SQLTable
 {
-    private readonly Word $name;
-    private readonly Word $primaryKey;
-    private readonly array $properties;
+    private readonly SnakeCaseWord $name;
+    private readonly SnakeCaseWord $primaryKey;
+    private readonly array $fields;
 
-    public function __construct(Word $name, Word $primaryKey, array ...$properties)
+    public function __construct(SnakeCaseWord $name, SnakeCaseWord $primaryKey, SQLField ...$fields)
     {
         $this->name = $name;
         $this->primaryKey = $primaryKey;
-        $this->properties = $properties;
+        $this->fields = $fields;
     }
 
-    public function getName() : Word
+    public function getName() : SnakeCaseWord
     {
         return $this->name;
     }
 
-    public function getPrimarykey() : Word
+    public function getPrimarykey() : SnakeCaseWord
     {
         return $this->primaryKey;
     }
 
-    public function getProperties() : array
+    public function getFields() : array
     {
-        return $this->properties;
+        return $this->fields;
     }
 
     public function toArray() : array

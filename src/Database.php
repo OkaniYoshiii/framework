@@ -6,6 +6,8 @@ use OkaniYoshiii\Framework\Contracts\Traits\SingletonTrait;
 use OkaniYoshiii\Framework\Types\EntityDto;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\Word;
+use OkaniYoshiii\Framework\Types\SQLField;
+use OkaniYoshiii\Framework\Types\SQLTable;
 use PDO;
 use PDOStatement;
 
@@ -46,8 +48,10 @@ class Database
         $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $this->name);
     }
 
-    public function createTable(SnakeCaseWord $table, SnakeCaseWord ...$fields) : void
+    public function createTable(SQLTable $table) : void
     {
+        $fields = array_map(fn(SQLField $field) : string => $field->getDatabaseMapping(), $table->getFields());
+
         $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
         $this->pdo->query($sqlQuery);
     }

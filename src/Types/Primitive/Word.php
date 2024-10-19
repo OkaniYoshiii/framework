@@ -4,7 +4,6 @@ namespace OkaniYoshiii\Framework\Types\Primitive;
 
 use Exception;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
-use OkaniYoshiii\Framework\Types\StringType;
 
 class Word extends StringType
 {
