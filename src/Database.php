@@ -50,9 +50,7 @@ class Database
 
     public function createTable(SQLTable $table) : void
     {
-        $fields = array_map(fn(SQLField $field) : string => $field->getDatabaseMapping(), $table->getFields());
-
-        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table . '(' . implode(', ', $fields) . ')';
+        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table->getName() . '(' . implode(', ', $table->getFields()) . ')';
         $this->pdo->query($sqlQuery);
     }
 

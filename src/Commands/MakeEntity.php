@@ -24,8 +24,6 @@ class MakeEntity extends ShellCommand
 {
     public const CMD_NAME = 'entity:make';
 
-    private static Word $primaryKey;
-
     protected static function configureRequirements(): array
     {
         $message = 'Cannot connect to database';
@@ -58,7 +56,7 @@ class MakeEntity extends ShellCommand
             $properties = $entity->getProperties();
 
             $table = new SQLTable($name, $primaryKey, ...$properties);
-            // self::saveEntityAsJSON();
+
             $database->createTable($table);
         }
 
@@ -139,7 +137,8 @@ class MakeEntity extends ShellCommand
 
         $isNullable = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
 
-        $property = new SQLField($name, $type, $isNullable);
+        $fieldName = StringHelper::camelCaseToSnakeCase($name);
+        $property = new SQLField($fieldName, $type, $isNullable);
         if(isset($length) && $length !== null) $property->setLength($length);
 
         return $property;
