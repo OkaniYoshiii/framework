@@ -2,9 +2,15 @@
 
 namespace OkaniYoshiii\Framework\Commands;
 
+use DateTime;
 use Exception;
+use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\PhpFile;
+use Nette\PhpGenerator\PhpNamespace;
+use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 use OkaniYoshiii\Framework\Database;
+use OkaniYoshiii\Framework\Enums\DataType;
 use OkaniYoshiii\Framework\Enums\SQLFieldType;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
 use OkaniYoshiii\Framework\ShellProgram;
@@ -52,7 +58,9 @@ class MakeEntity extends ShellCommand
 
             $table = new SQLTable($name, $primaryKey, ...$properties);
 
-            $database->createTable($table);
+            // $database->createTable($table);
+
+            self::generatePHPFileFromEntity($entity, './src/Entities');
         }
 
         $isAddingAnotherEntity = self::askAddAnotherEntity();
@@ -192,5 +200,75 @@ class MakeEntity extends ShellCommand
     private static function askAddAnotherEntity() : bool
     {
         return ShellProgram::askBooleanQuestion('Voulez vous créer une nouvelle entité ?');
+    }
+
+    private static function generatePHPFileFromEntity(Entity $entity, string $path) : void
+    {
+        $phpFile = new PhpFile();
+        $phpFile->setStrictTypes();
+
+        $namespace = $phpFile->addNamespace('App\\Entities');
+
+        $class = $namespace->addClass($entity->getName())->setFinal();
+
+        foreach($entity->getProperties() as $property) 
+        {
+            $propertyName = StringHelper::snakeCaseToCamelCase($property->getName());
+            $propertyType = match($property->getType()) {
+                SQLFieldType::STRING,
+                SQLFieldType::TEXT,
+                SQLFieldType::PASSWORD => DataType::STRING->typeDeclaration(),
+                SQLFieldType::BOOLEAN => DataType::BOOLEAN->typeDeclaration(),
+                SQLFieldType::DATETIME => 'Datetime',
+                SQLFieldType::INTEGER => DataType::INTEGER->typeDeclaration(),
+            };
+
+            if($property->getType() === SQLFieldType::DATETIME) {
+                $namespace->addUse('Datetime');
+            }
+
+            $class
+                ->addProperty($propertyName)
+                ->setType($propertyType);
+
+            // SETTER METHOD
+            $methodName = 'set' . ucfirst(StringHelper::snakeCaseToCamelCase($property->getName())->getValue());
+            
+            $method = $class
+                ->addMethod($methodName)
+                ->setBody(
+                    <<<METHOD_BODY
+                    \$this->{$propertyName} = \${$propertyName};
+
+                    return \$this;
+                    METHOD_BODY
+                )
+                ->setReturnType('self');
+
+            $method
+                ->addParameter($propertyName)
+                ->setType($propertyType);
+
+            // GETTER METHOD
+            $methodName = 'get' . ucfirst(StringHelper::snakeCaseToCamelCase($property->getName())->getValue());
+            
+            $method = $class
+                ->addMethod($methodName)
+                ->setBody(
+                    <<<METHOD_BODY
+                    return \$this->{$propertyName};
+                    METHOD_BODY
+                )
+                ->setReturnType($propertyType);
+
+        }
+
+        if(!is_dir($path)) mkdir($path);
+        
+        $filePath = $path;
+        if(str_ends_with($path, '/') === false) $filePath .= '/' ;
+        $filePath .= $entity->getName() . '.php';
+
+        file_put_contents($filePath, $phpFile);
     }
 }
