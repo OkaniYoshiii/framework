@@ -3,8 +3,6 @@
 namespace OkaniYoshiii\Framework\Contracts\Abstracts;
 
 use Exception;
-use OkaniYoshiii\Framework\ShellProgram;
-use OkaniYoshiii\Framework\Types\Requirement;
 use OkaniYoshiii\Framework\Types\Test;
 
 abstract class ShellCommand

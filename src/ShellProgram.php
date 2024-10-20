@@ -15,7 +15,7 @@ use Throwable;
 class ShellProgram
 {
     public static function start(array $argv)
-    {
+    {       
         match($argv[1]) {
             // DatabaseCreate::CMD_NAME => DatabaseCreate::setupAndExecute(),
             // Init::CMD_NAME => Init::setupAndExecute(),
@@ -70,10 +70,18 @@ class ShellProgram
      */
     public static function askOpenEndedQuestion(string $question, bool $asInteger = false, string|int|null $defaultAnswer = null) : string|int
     {
+        if($defaultAnswer !== null) {
+            $question .= ' : [' . $defaultAnswer . ']';
+        }
+
         echo $question;
         echo PHP_EOL;
 
         $answer = self::waitForAnswer();
+
+        if(empty($answer) && $defaultAnswer !== null) {
+            $answer = $defaultAnswer;
+        }
 
         if(empty($answer) && $defaultAnswer === null) {
             self::displayErrorMessage('La question est obligatoire');
@@ -89,7 +97,7 @@ class ShellProgram
             $answer = intval($answer);
         }
 
-        return (empty($answer)) ? $defaultAnswer : $answer;
+        return $answer;
     }
 
     /**
@@ -135,7 +143,7 @@ class ShellProgram
      */
     public static function askBooleanQuestion(string $question, ?bool $defaultAnswer = null) : bool
     {
-        $answersMapping = ['O' => true, 'N' => false];
+        $answersMapping = ['y' => true, 'n' => false];
 
         $defaultAnswer = ($defaultAnswer !== null) ? array_search($defaultAnswer, $answersMapping, true) : null;
 

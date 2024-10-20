@@ -85,7 +85,7 @@ class MakeEntity extends ShellCommand
 
             ShellProgram::addBreakLine();
 
-            $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?');
+            $isAddingAnotherProperty = ShellProgram::askBooleanQuestion('Souhaitez-vous rajouter une propriété ?', true);
             
             if($isAddingAnotherProperty === true) ShellProgram::addBreakLine();
 
@@ -131,7 +131,7 @@ class MakeEntity extends ShellCommand
             $length = $type->length();
         }
 
-        $isNullable = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?');
+        $isNullable = ShellProgram::askBooleanQuestion('Est ce que cette propriété peut être nulle ?', true);
 
         $fieldName = StringHelper::camelCaseToSnakeCase($name);
         $property = new SQLField($fieldName, $type, $isNullable);
@@ -159,7 +159,7 @@ class MakeEntity extends ShellCommand
     {
         $entityStringRepresentation = self::buildEntityRepresentation($entity);
         
-        return ShellProgram::askBooleanQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . PHP_EOL . $entityStringRepresentation . PHP_EOL . 'Êtes vous sur de vos choix ?');
+        return ShellProgram::askBooleanQuestion('Voici l\'entité nouvellement configurée : ' . PHP_EOL . PHP_EOL . $entityStringRepresentation . PHP_EOL . 'Êtes vous sur de vos choix ?', true);
     }
 
     private static function askPropertyName() : CamelCaseWord
@@ -215,7 +215,7 @@ class MakeEntity extends ShellCommand
 
     private static function askAddAnotherEntity() : bool
     {
-        return ShellProgram::askBooleanQuestion('Voulez vous créer une nouvelle entité ?');
+        return ShellProgram::askBooleanQuestion('Voulez vous créer une nouvelle entité ?', true);
     }
 
     private static function generatePHPFileFromEntity(Entity $entity, string $path) : void
@@ -245,6 +245,8 @@ class MakeEntity extends ShellCommand
 
             $class
                 ->addProperty($propertyName)
+                ->setVisibility('private')
+                ->setValue(null)
                 ->setType($propertyType);
 
             // SETTER METHOD
