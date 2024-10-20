@@ -118,7 +118,8 @@ class MakeEntity extends ShellCommand
 
         ShellProgram::addBreakLine();
 
-        $type = self::askPropertyType();
+        $defaultType = self::guessPropertyTypeFromName($name);
+        $type = self::askPropertyType($defaultType);
 
         ShellProgram::addBreakLine();
 
@@ -137,6 +138,21 @@ class MakeEntity extends ShellCommand
         if(isset($length) && $length !== null) $property->setLength($length);
 
         return $property;
+    }
+
+    private static function guessPropertyTypeFromName(CamelCaseWord $propertyName) : ?SQLFieldType
+    {
+        $type = null;
+
+        if(str_starts_with($propertyName->getValue(), 'is')) {
+            $type = SQLFieldType::BOOLEAN;
+        }
+
+        if(str_ends_with($propertyName->getValue(), 'At')) {
+            $type = SQLFieldType::DATETIME;
+        }
+
+        return $type;
     }
 
     private static function askValidationForCreatedEntity(Entity $entity) : bool
@@ -165,9 +181,9 @@ class MakeEntity extends ShellCommand
         return new CamelCaseWord($name);
     }
 
-    private static function askPropertyType() : SQLFieldType
+    private static function askPropertyType(?SQLFieldType $defaultType = null) : SQLFieldType
     {
-        $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', SQLFieldType::values());
+        $type = ShellProgram::askCloseEndedQuestion('De quel type est cette propriété ?', SQLFieldType::values(), defaultAnswer : $defaultType?->value);
 
         return SQLFieldType::from($type);
     }
@@ -176,7 +192,7 @@ class MakeEntity extends ShellCommand
     {
         if($type->maxLength() === null) throw new Exception(__METHOD__ . ' can only be used when $type has a maxLength.');
 
-        $length = ShellProgram::askOpenEndedQuestion('Quelle longueur maximale peut avoir cette propriété dans la base de données ? (longueur maximale : ' . $type->maxLength() . ')', asInteger : true);
+        $length = ShellProgram::askOpenEndedQuestion('Quelle longueur maximale peut avoir cette propriété dans la base de données ? (longueur maximale : ' . $type->maxLength() . ')', asInteger : true, defaultAnswer : $type->maxLength());
 
         if($length > $type->maxLength()) {
             ShellProgram::displayErrorMessage($length . ' est supérieur à la longueur maximale de ce type de propriété (' . $type->maxLength() . ')');

@@ -68,14 +68,14 @@ class ShellProgram
      * @param string $question
      * @return string
      */
-    public static function askOpenEndedQuestion(string $question, bool $asInteger = false) : string|int
+    public static function askOpenEndedQuestion(string $question, bool $asInteger = false, string|int|null $defaultAnswer = null) : string|int
     {
         echo $question;
         echo PHP_EOL;
 
         $answer = self::waitForAnswer();
 
-        if(empty($answer)) {
+        if(empty($answer) && $defaultAnswer === null) {
             self::displayErrorMessage('La question est obligatoire');
             return call_user_func(__METHOD__, $question, $asInteger);
         }
@@ -87,9 +87,9 @@ class ShellProgram
             }
 
             $answer = intval($answer);
-        } 
+        }
 
-        return $answer;
+        return (empty($answer)) ? $defaultAnswer : $answer;
     }
 
     /**
@@ -102,12 +102,15 @@ class ShellProgram
      * @param string $question
      * @param array $answers
      */
-    public static function askCloseEndedQuestion(string $question, array $answers, ?string $helpMessage = null) : string
+    public static function askCloseEndedQuestion(string $question, array $answers, ?string $helpMessage = null, string|int|null $defaultAnswer = null) : string
     {
         $helpOption = 'help';
         $formattedQuestion = $question . ' (' . implode('/', $answers) . ')';
         $formattedQuestion .= ($helpMessage !== null) ? PHP_EOL . 'Tapez "' . $helpOption . '" pour obtenir de l\'aide supplémentaire' : '';
-        $answer = self::askOpenEndedQuestion($formattedQuestion); 
+
+        if($defaultAnswer !== null && !in_array($defaultAnswer, $answers)) throw new Exception('Cannot set a default answer that is not in the possible answers list');
+
+        $answer = self::askOpenEndedQuestion(question : $formattedQuestion, defaultAnswer : $defaultAnswer); 
 
         if($answer === $helpOption) {
             self::displayHelpMessage($helpMessage);
@@ -130,11 +133,13 @@ class ShellProgram
      * @param string $question La question à poser
      * @return bool
      */
-    public static function askBooleanQuestion(string $question) : bool
+    public static function askBooleanQuestion(string $question, ?bool $defaultAnswer = null) : bool
     {
         $answersMapping = ['O' => true, 'N' => false];
 
-        $answer = ShellProgram::askCloseEndedQuestion($question, array_keys($answersMapping));
+        $defaultAnswer = ($defaultAnswer !== null) ? array_search($defaultAnswer, $answersMapping, true) : null;
+
+        $answer = ShellProgram::askCloseEndedQuestion($question, array_keys($answersMapping), defaultAnswer : $defaultAnswer);
 
         return $answersMapping[$answer];
     }
