@@ -2,26 +2,23 @@
 
 namespace OkaniYoshiii\Framework;
 
-use Dotenv\Dotenv;
 use Exception;
-use OkaniYoshiii\Framework\Commands\DatabaseCreate;
-use OkaniYoshiii\Framework\Commands\Init;
 use OkaniYoshiii\Framework\Commands\LinkEntity;
 use OkaniYoshiii\Framework\Commands\MakeEntity;
-use OkaniYoshiii\Framework\Commands\ModifyEntity;
 use OkaniYoshiii\Framework\Enums\DataType;
-use Throwable;
 
 class ShellProgram
 {
+    public const ENTITIES_DIR = './src/Entities';
+    
     public static function start(array $argv)
     {       
         match($argv[1]) {
             // DatabaseCreate::CMD_NAME => DatabaseCreate::setupAndExecute(),
             // Init::CMD_NAME => Init::setupAndExecute(),
             MakeEntity::CMD_NAME => MakeEntity::setupAndExecute(),
-            // ModifyEntity::CMD_NAME => ModifyEntity::setup(),
-            // LinkEntity::CMD_NAME => LinkEntity::setup(),
+            // ModifyEntity::CMD_NAME => ModifyEntity::setupAndExecute(),
+            LinkEntity::CMD_NAME => LinkEntity::setupAndExecute(),
             default => self::displayErrorMessage('La commande spécifiée n\'existe pas'),
         };
     }

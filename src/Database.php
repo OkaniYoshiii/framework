@@ -3,10 +3,11 @@
 namespace OkaniYoshiii\Framework;
 
 use OkaniYoshiii\Framework\Contracts\Traits\SingletonTrait;
-use OkaniYoshiii\Framework\Types\EntityDto;
+use OkaniYoshiii\Framework\Helpers\StringHelper;
+use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\Word;
-use OkaniYoshiii\Framework\Types\SQLField;
+use OkaniYoshiii\Framework\Types\SQLPrimaryKey;
 use OkaniYoshiii\Framework\Types\SQLTable;
 use PDO;
 use PDOStatement;
@@ -45,12 +46,12 @@ class Database
 
     public function create() 
     {
-        $this->stmt = $this->pdo->query('CREATE DATABASE IF NOT EXISTS ' . $this->name);
+        $this->stmt = $this->pdo->query('CREATE DATABASE ' . $this->name);
     }
 
     public function createTable(SQLTable $table) : void
     {
-        $sqlQuery = 'CREATE TABLE IF NOT EXISTS ' . $table->getName() . '(' . implode(', ', $table->getFields()) . ')';
+        $sqlQuery = 'CREATE TABLE ' . $table->getName() . '(' . $table->getPrimarykey()->getDatabaseMapping() . ',' . implode(', ', $table->getFields()) . ')';
         $this->pdo->query($sqlQuery);
     }
 
@@ -74,12 +75,14 @@ class Database
         return $results;
     }
 
-    public function addForeignkey(EntityDto $entity, EntityDto $linkedEntity) : void
+    public function addForeignkey(SnakeCaseWord $mainTable, SnakeCaseWord $linkedTable) : void
     {
-        $sqlQuery = 'ALTER TABLE ' . $entity->getTable() . ' ADD ' . $linkedEntity->getPrimarykey() . ' INT(11) UNSIGNED NOT NULL;';
-        $sqlQuery .= 'ALTER TABLE ' . $entity->getTable() . ' ADD FOREIGN KEY (' . $linkedEntity->getPrimarykey() . ') REFERENCES ' .  $linkedEntity->getTable() . '(' . $linkedEntity->getPrimarykey() . ');';
+        $primaryKey = new SQLPrimaryKey($mainTable);
         
-        self::$pdo->query($sqlQuery);
+        $sqlQuery = 'ALTER TABLE ' . $linkedTable . ' ADD ' . $primaryKey->getSimpleDatabaseMapping() . ';';
+        $sqlQuery .= 'ALTER TABLE ' . $linkedTable . ' ADD FOREIGN KEY (' . $primaryKey->getName() . ') REFERENCES ' .  $linkedTable . '(' . $primaryKey->getName() . ');';
+
+        $this->pdo->query($sqlQuery);
     }
 
     public function disconnect()

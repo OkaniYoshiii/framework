@@ -69,6 +69,16 @@ class SQLField
         return $this->isNullable;
     }
 
+    public function getLength() : ?int
+    {
+        return $this->length;
+    }
+
+    public function getIsUnsigned() : bool
+    {
+        return $this->isUnsigned;
+    }
+
     public function getDatabaseMapping() : string
     {
         $name = $this->name->getValue();
@@ -79,6 +89,17 @@ class SQLField
         $isUnsigned = ($this->isUnsigned) ? 'UNSIGNED' : '';
 
         return implode(' ', [$name, $type, $length, $isUnsigned, $isNullable, $isPrimaryKey]);
+    }
+
+    public function getSimpleDatabaseMapping() : string
+    {
+        $name = $this->name->getValue();
+        $type =  $this->getType()->mapping();
+        $length = ($this->length !== null) ? '(' . $this->length . ')' : '';
+        $isNullable = ($this->getIsNullable()) ? 'NULL' : 'NOT NULL';
+        $isUnsigned = ($this->isUnsigned) ? 'UNSIGNED' : '';
+
+        return implode(' ', [$name, $type, $length, $isUnsigned, $isNullable]);
     }
 
     public function toArray() : array

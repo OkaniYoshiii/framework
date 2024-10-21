@@ -8,10 +8,10 @@ use OkaniYoshiii\Framework\Types\Primitive\Word;
 class SQLTable
 {
     private readonly SnakeCaseWord $name;
-    private readonly SnakeCaseWord $primaryKey;
+    private readonly SQLPrimaryKey $primaryKey;
     private readonly array $fields;
 
-    public function __construct(SnakeCaseWord $name, SnakeCaseWord $primaryKey, SQLField ...$fields)
+    public function __construct(SnakeCaseWord $name, SQLPrimaryKey $primaryKey, SQLField ...$fields)
     {
         $this->name = $name;
         $this->primaryKey = $primaryKey;
@@ -23,7 +23,7 @@ class SQLTable
         return $this->name;
     }
 
-    public function getPrimarykey() : SnakeCaseWord
+    public function getPrimarykey() : SQLPrimaryKey
     {
         return $this->primaryKey;
     }

@@ -19,6 +19,7 @@ use OkaniYoshiii\Framework\Types\Primitive\CamelCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\SQLField;
+use OkaniYoshiii\Framework\Types\SQLPrimaryKey;
 use OkaniYoshiii\Framework\Types\SQLTable;
 use OkaniYoshiii\Framework\Types\Test;
 
@@ -53,14 +54,15 @@ class MakeEntity extends ShellCommand
         ShellProgram::addBreakLine();
         if($isValidated) {
             $name = StringHelper::pascalCaseToSnakeCase($entity->getName());
-            $primaryKey = new SnakeCaseWord($name->getValue() . '_id');
+            $primaryKey = new SQLPrimaryKey($name);
+
             $properties = $entity->getProperties();
 
             $table = new SQLTable($name, $primaryKey, ...$properties);
 
-            // $database->createTable($table);
+            $database->createTable($table);
 
-            self::generatePHPFileFromEntity($entity, './src/Entities');
+            self::generatePHPFileFromEntity($entity, ShellProgram::ENTITIES_DIR);
         }
 
         $isAddingAnotherEntity = self::askAddAnotherEntity();

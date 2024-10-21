@@ -30,6 +30,20 @@ class StringHelper
         return new SnakeCaseWord($string);
     }
 
+    public static function pascalCaseToCamelCase(PascalCaseWord $string) : CamelCaseWord
+    {
+        $string = lcfirst($string->getValue());
+
+        return new CamelCaseWord($string);
+    }
+
+    public static function camelCaseToPascalCase(CamelCaseWord $string) : PascalCaseWord
+    {
+        $string = ucfirst($string->getValue());
+
+        return new PascalCaseWord($string);
+    }
+
     public static function stringToTitleCase(string $string) : string
     {
         return str_replace('_', '', mb_convert_case($string, MB_CASE_TITLE));
