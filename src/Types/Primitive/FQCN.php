@@ -12,4 +12,11 @@ class FQCN extends StringType
             throw new Exception($value . ' class does not exists, has not been correctly autoloaded or is not a valid Fully Qualified Class Name');
         }
     }
+
+    public function getClassName() : PascalCaseWord
+    {
+        $classParts = explode('\\', $this->getValue());
+
+        return new PascalCaseWord(end($classParts));
+    }
 }
