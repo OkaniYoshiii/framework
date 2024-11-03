@@ -2,6 +2,7 @@
 
 namespace OkaniYoshiii\Framework\Helpers;
 
+use Exception;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\Property;
@@ -15,8 +16,11 @@ class EntityBuilder
 
     public function __construct(string $entityName)
     {
-        $this->phpFile = (new PhpFile)->setStrictTypes(true);
-        $namespace = $this->phpFile->addNamespace('App\\Entities');
+        $this->phpFile = (new PhpFile)
+            ->setStrictTypes(true);
+        $namespace = $this->phpFile
+            ->addNamespace('App\\Entities')
+            ->addUse(SQLField::class);
         $this->entity = $namespace
             ->addClass($entityName);
     }
@@ -33,7 +37,9 @@ class EntityBuilder
 
     public function mapSQLFieldToProperty(string $property, string $field, bool $isNullable) : self
     {
-        $this->entity->addAttribute(SQLField::class, ['field' => $field, 'isNullable' => $isNullable]);
+        if(!$this->entity->hasProperty($property)) throw new Exception('Property "' . $property . '" does not exists on Entity');
+
+        $this->entity->getProperty($property)->addAttribute(SQLField::class, ['name' => $field, 'isNullable' => $isNullable]);
 
         return $this;
     }
