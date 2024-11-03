@@ -8,7 +8,7 @@ class FQCN extends StringType
 {
     public function validate(string $value) : void
     {
-        if(!class_exists($value)) {
+        if(!self::isValid($value)) {
             throw new Exception($value . ' class does not exists, has not been correctly autoloaded or is not a valid Fully Qualified Class Name');
         }
     }
@@ -18,5 +18,10 @@ class FQCN extends StringType
         $classParts = explode('\\', $this->getValue());
 
         return new PascalCaseWord(end($classParts));
+    }
+
+    public static function isValid(string $value) : bool
+    {
+        return class_exists($value);
     }
 }

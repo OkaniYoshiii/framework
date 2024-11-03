@@ -2,12 +2,8 @@
 
 namespace OkaniYoshiii\Framework\Commands;
 
-use DateTime;
 use Exception;
-use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpFile;
-use Nette\PhpGenerator\PhpNamespace;
-use OkaniYoshiii\Framework\App;
 use OkaniYoshiii\Framework\Contracts\Abstracts\ShellCommand;
 use OkaniYoshiii\Framework\Database;
 use OkaniYoshiii\Framework\Enums\DataType;
@@ -17,7 +13,6 @@ use OkaniYoshiii\Framework\ShellProgram;
 use OkaniYoshiii\Framework\Types\Entity;
 use OkaniYoshiii\Framework\Types\Primitive\CamelCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
-use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\SQLField;
 use OkaniYoshiii\Framework\Types\SQLPrimaryKey;
 use OkaniYoshiii\Framework\Types\SQLTable;

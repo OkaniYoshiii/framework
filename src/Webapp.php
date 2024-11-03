@@ -6,18 +6,23 @@ use Dotenv\Dotenv;
 use OkaniYoshiii\Framework\Router;
 use OkaniYoshiii\Framework\Session;
 
-class Webapp
+class Webapp extends App
 {
+    public static function loadEnvVariables(): void
+    {
+        $dotenv = Dotenv::createImmutable('./../', '.env');
+        $dotenv->load();
+
+        $dotenv = Dotenv::createImmutable('./../', '.env.local');
+        $dotenv->load();
+    }
+
     public static function init()
     {
         $loader = new \Twig\Loader\FilesystemLoader('../templates');
         $twig = new \Twig\Environment($loader, ['strict_variables' => true]);
 
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env');
-        $dotenv->load();
-
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env.local');
-        $dotenv->load();
+        self::loadEnvVariables();        
 
         $session = Session::getInstance();
         $session->start();

@@ -2,21 +2,35 @@
 
 namespace OkaniYoshiii\Framework;
 
+use Dotenv\Dotenv;
 use Exception;
 use OkaniYoshiii\Framework\Commands\LinkEntity;
 use OkaniYoshiii\Framework\Commands\MakeEntity;
+use OkaniYoshiii\Framework\Commands\SynchronizeEntity;
 use OkaniYoshiii\Framework\Enums\DataType;
 
-class ShellProgram
+class ShellProgram extends App
 {
     public const ENTITIES_DIR = './src/Entities';
+
+    public static function loadEnvVariables() : void
+    {
+        $dotenv = Dotenv::createImmutable('./', '.env');
+        $dotenv->load();
+
+        $dotenv = Dotenv::createImmutable('./', '.env.local');
+        $dotenv->load();
+    }
     
     public static function start(array $argv)
     {       
+        self::loadEnvVariables();
+
         match($argv[1]) {
             // DatabaseCreate::CMD_NAME => DatabaseCreate::setupAndExecute(),
             // Init::CMD_NAME => Init::setupAndExecute(),
             MakeEntity::CMD_NAME => MakeEntity::setupAndExecute(),
+            SynchronizeEntity::CMD_NAME => SynchronizeEntity::setupAndExecute(),
             // ModifyEntity::CMD_NAME => ModifyEntity::setupAndExecute(),
             LinkEntity::CMD_NAME => LinkEntity::setupAndExecute(),
             default => self::displayErrorMessage('La commande spécifiée n\'existe pas'),

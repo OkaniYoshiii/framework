@@ -2,9 +2,10 @@
 
 namespace OkaniYoshiii\Framework;
 
+use Dotenv\Dotenv;
 use OkaniYoshiii\Framework\Contracts\Traits\SingletonTrait;
-use OkaniYoshiii\Framework\Helpers\StringHelper;
-use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
+use OkaniYoshiii\Framework\Enums\DataType;
+use OkaniYoshiii\Framework\Types\Database\SQLColumnMetadata;
 use OkaniYoshiii\Framework\Types\Primitive\SnakeCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\Word;
 use OkaniYoshiii\Framework\Types\SQLPrimaryKey;
@@ -26,8 +27,6 @@ class Database
 
     private function __construct()
     {
-        App::loadEnvVariables();
-
         $this->name = new Word($_ENV['DATABASE_NAME']);
         $this->host = new Word($_ENV['DATABASE_HOST']);
         $this->user = new Word($_ENV['DATABASE_USER']);
@@ -83,6 +82,37 @@ class Database
         $sqlQuery .= 'ALTER TABLE ' . $linkedTable . ' ADD FOREIGN KEY (' . $primaryKey->getName() . ') REFERENCES ' .  $linkedTable . '(' . $primaryKey->getName() . ');';
 
         $this->pdo->query($sqlQuery);
+    }
+
+    public function getTableFields(string $table) : array
+    {
+        return $this->pdo->query('DESCRIBE ' . $table)->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function getFieldMeta(string $table, string $field) : SQLColumnMetadata|false
+    {
+        $stmt = $this->pdo->query('SELECT * FROM `' . $table . '`');
+        $fields = $this->getTableFields($table);
+        $fieldIndex = array_search($field, $fields, strict : true);
+        
+        if(gettype($fieldIndex) !== DataType::INTEGER->value) {
+            return false;
+        }
+
+        $meta = $stmt->getColumnMeta($fieldIndex);
+
+        return ($meta !== false) ? new SQLColumnMetadata($meta['flags'], $meta['name'], $meta['table'], $meta['len'], $meta['precision'], $meta['pdo_type']) : false;
+    }
+
+    public function getPrimaryKey(string $table) : array
+    {
+        $stmt = $this->pdo->query("SHOW KEYS FROM $table WHERE Key_name = 'PRIMARY'");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function query(string $query) : PDOStatement
+    {
+        return $this->pdo->query($query);
     }
 
     public function disconnect()

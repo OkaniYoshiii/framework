@@ -44,6 +44,13 @@ class StringHelper
         return new PascalCaseWord($string);
     }
 
+    public static function snakeCaseToPascalCase(SnakeCaseWord $string) : PascalCaseWord
+    {
+        $camelCase = self::snakeCaseToCamelCase($string);
+        
+        return self::camelCaseToPascalCase($camelCase);
+    }
+
     public static function stringToTitleCase(string $string) : string
     {
         return str_replace('_', '', mb_convert_case($string, MB_CASE_TITLE));
