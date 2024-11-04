@@ -115,6 +115,11 @@ class Database
         return $this->pdo->query($query);
     }
 
+    public function prepare(string $query) : PDOStatement
+    {
+        return $this->pdo->prepare($query);
+    }
+
     public function disconnect()
     {
         $this->pdo = null;

@@ -4,30 +4,41 @@ namespace OkaniYoshiii\Framework\Helpers;
 
 use Exception;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\PhpFile;
-use Nette\PhpGenerator\Property;
+use Nette\PhpGenerator\PhpNamespace;
+use OkaniYoshiii\Framework\Contracts\Abstracts\Entity;
 use OkaniYoshiii\Framework\Contracts\Attributes\SQLField;
+use OkaniYoshiii\Framework\Contracts\Attributes\SQLPrimaryKey;
+use OkaniYoshiii\Framework\Contracts\Attributes\SQLTable;
+use OkaniYoshiii\Framework\Enums\DataType;
 use OkaniYoshiii\Framework\ShellProgram;
 
 class EntityBuilder
 {
     private PhpFile $phpFile;
+    private PhpNamespace $namespace;
     private ClassType $entity;
 
     public function __construct(string $entityName)
     {
         $this->phpFile = (new PhpFile)
             ->setStrictTypes(true);
-        $namespace = $this->phpFile
+        $this->namespace = $this->phpFile
             ->addNamespace('App\\Entities')
-            ->addUse(SQLField::class);
-        $this->entity = $namespace
-            ->addClass($entityName);
+            ->addUse(DataType::class)
+            ->addUse(SQLField::class)
+            ->addUse(SQLTable::class)
+            ->addUse(SQLPrimaryKey::class)
+            ->addUse(Entity::class);
+        $this->entity = $this->namespace
+            ->addClass($entityName)
+            ->setExtends(Entity::class);
     }
 
     public function addProperty(string $name, string $type) : self
     {
-        $property = $this->entity
+        $this->entity
             ->addProperty($name)
             ->setType($type)
             ->setNullable(true);
@@ -35,11 +46,27 @@ class EntityBuilder
         return $this;
     }
 
-    public function mapSQLFieldToProperty(string $property, string $field, bool $isNullable) : self
+    public function mapSQLTableToEntity(string $tableName) : self
+    {
+        $this->entity->addAttribute(SQLTable::class, ['name' => $tableName]);
+
+        return $this;
+    }
+
+    public function mapSQLPrimaryKeyToProperty(string $property, string $field) : self
     {
         if(!$this->entity->hasProperty($property)) throw new Exception('Property "' . $property . '" does not exists on Entity');
 
-        $this->entity->getProperty($property)->addAttribute(SQLField::class, ['name' => $field, 'isNullable' => $isNullable]);
+        $this->entity->getProperty($property)->addAttribute(SQLPrimaryKey::class, ['name' => $field]);
+
+        return $this;
+    }
+
+    public function mapSQLFieldToProperty(string $property, string $field, bool $isNullable, DataType $type) : self
+    {
+        if(!$this->entity->hasProperty($property)) throw new Exception('Property "' . $property . '" does not exists on Entity');
+
+        $this->entity->getProperty($property)->addAttribute(SQLField::class, ['name' => $field, 'isNullable' => $isNullable, 'type' => new Literal('DataType::' . $type->name)]);
 
         return $this;
     }

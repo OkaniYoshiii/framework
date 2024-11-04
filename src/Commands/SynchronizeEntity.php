@@ -10,7 +10,6 @@ use OkaniYoshiii\Framework\Database;
 use OkaniYoshiii\Framework\Helpers\EntityBuilder;
 use OkaniYoshiii\Framework\Helpers\StringHelper;
 use OkaniYoshiii\Framework\Helpers\TypeConverter;
-use OkaniYoshiii\Framework\ShellProgram;
 use OkaniYoshiii\Framework\Types\Primitive\CamelCaseWord;
 use OkaniYoshiii\Framework\Types\Primitive\FQCN;
 use OkaniYoshiii\Framework\Types\Primitive\PascalCaseWord;
@@ -48,6 +47,9 @@ final class SynchronizeEntity extends ShellCommand
 
         $entityBuilder = new EntityBuilder($entityName);
 
+        $entityBuilder
+            ->mapSQLTableToEntity($table);
+
         foreach($fields as $field)
         {
             $propertyName = match(true) {
@@ -58,14 +60,20 @@ final class SynchronizeEntity extends ShellCommand
 
             $meta = $database->getFieldMeta($table, $field);
 
-            $type = TypeConverter::pdoTypeToPhpType($meta->getPdoType())->typeDeclaration();
-            $isNullable = (array_search('not_null', $meta->getFlags(), true) === false);
+            $dataType = TypeConverter::pdoTypeToPhpType($meta->getPdoType());
+            $type = $dataType->typeDeclaration();
 
             $entityBuilder
                 ->addProperty($propertyName, $type)
-                ->mapSQLFieldToProperty($propertyName, $field, $isNullable)
                 ->addGetterMethod($propertyName, $type)
                 ->addSetterMethod($propertyName, $type);
+
+            if(array_search('primary_key', $meta->getFlags()) !== false) {
+                $entityBuilder->mapSQLPrimaryKeyToProperty($propertyName, $field);
+            } else {
+                $isNullable = (array_search('not_null', $meta->getFlags(), true) === false);
+                $entityBuilder->mapSQLFieldToProperty($propertyName, $field, $isNullable, $dataType);
+            }
         }
 
         $entityBuilder->createPhpFile();

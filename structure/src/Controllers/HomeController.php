@@ -20,7 +20,6 @@ class HomeController
 
     public function index() : array
     {
-
         return ['template' => 'index.html.twig', 'variables' => []];
     }
 }

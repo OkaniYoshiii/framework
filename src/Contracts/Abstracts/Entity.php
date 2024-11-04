@@ -1,6 +1,6 @@
 <?php
 
-namespace OkaniYoshiii\Framework\Types\Database;
+namespace OkaniYoshiii\Framework\Contracts\Abstracts;
 
 abstract class Entity
 {
